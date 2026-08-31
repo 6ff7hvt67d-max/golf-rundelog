@@ -13,7 +13,7 @@ main{max-width:920px;margin:auto;padding:12px 12px 90px}.card{background:#fff;bo
 input,select,button{font:inherit}input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
 button{border:0;border-radius:10px;padding:11px 14px;font-weight:600;cursor:pointer}.primary{background:var(--accent);color:#fff}.secondary{background:#e8eee9}.danger{background:#fdecea;color:var(--danger)}
 .hidden{display:none!important}.row{display:flex;gap:8px;flex-wrap:wrap}.pill{border:1px solid var(--line);background:white;border-radius:999px;padding:9px 11px}.pill.active{background:var(--accent);color:white}
-.check{display:flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:10px;padding:10px}.summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.check{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--ink);font-size:15px;margin:0;min-height:52px}.check input{width:auto;flex:0 0 auto;margin:0;transform:scale(1.15)}.summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .metric{border:1px solid var(--line);border-radius:10px;padding:10px}.metric b{display:block;font-size:20px}.small{font-size:12px;color:var(--muted)}
 .history-item{border-top:1px solid var(--line);padding:10px 0}.nav{display:flex;justify-content:space-between;gap:8px;margin-top:12px}.table-wrap{overflow-x:auto}
 table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid var(--line);padding:7px 6px;text-align:center;white-space:nowrap}th{background:#eef3ef}
@@ -22,7 +22,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 @media(min-width:620px){.summary{grid-template-columns:repeat(4,1fr)}}
 </style></head>
 <body>
-<header><b>Golf Rundelog v1.2</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.3</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="grid2">
 <div><label>Dato</label><input id="date" type="date"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -35,7 +35,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 
 <div style="margin-top:12px"><label>Første putt-længde</label><div class="row" id="puttDistance">
 <button class="pill pd" data-value="" onclick="setPuttDist(this)">—</button><button class="pill pd" data-value="K" onclick="setPuttDist(this)">Kort &lt;3 m</button>
-<button class="pill pd" data-value="M" onclick="setPuttDist(this)">Mellem 3–8 m</button><button class="pill pd" data-value="L" onclick="setPuttDist(this)">Lang &gt;8 m</button></div></div>
+<button class="pill pd" data-value="M" onclick="setPuttDist(this)">Mellem 3–8 m</button><button class="pill pd" data-value="L" onclick="setPuttDist(this)">Over 8 m</button></div></div>
 
 <div class="grid2" style="margin-top:12px"><label class="check"><input id="free2" type="checkbox"> Frit 2. slag</label><label class="check"><input id="gir" type="checkbox"> GIR</label></div>
 
