@@ -19,10 +19,13 @@ button{border:0;border-radius:10px;padding:11px 14px;font-weight:600;cursor:poin
 table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid var(--line);padding:7px 6px;text-align:center;white-space:nowrap}th{background:#eef3ef}
 tr.editable{cursor:pointer}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#e8eee9;font-size:11px}
 footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:8px 12px;display:flex;gap:8px;justify-content:center}footer button{flex:1;max-width:240px}
+.num-buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.num-btn{background:#fff;border:1px solid var(--line);padding:12px 4px;border-radius:10px;font-size:18px}
+.num-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 @media(min-width:620px){.summary{grid-template-columns:repeat(4,1fr)}}
 </style></head>
 <body>
-<header><b>Golf Rundelog v1.3</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.4</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="grid2">
 <div><label>Dato</label><input id="date" type="date"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -31,7 +34,13 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 
 <section id="holeCard" class="card hidden">
 <div style="display:flex;justify-content:space-between;align-items:center"><h2>Registrering</h2><b>Hul <span id="holeNo">1</span>/18</b></div>
-<div class="grid2"><div><label>Stableford point</label><input id="points" type="number" min="0" max="6"></div><div><label>Putts</label><input id="putts" type="number" min="0" max="6"></div></div>
+<div class="grid2">
+<div><label>Stableford point</label><input id="points" type="hidden"><div id="pointsButtons" class="num-buttons">
+<button type="button" class="num-btn point-btn" onclick="setPoints(0,this)">0</button><button type="button" class="num-btn point-btn" onclick="setPoints(1,this)">1</button><button type="button" class="num-btn point-btn" onclick="setPoints(2,this)">2</button><button type="button" class="num-btn point-btn" onclick="setPoints(3,this)">3</button><button type="button" class="num-btn point-btn" onclick="setPoints(4,this)">4</button>
+</div></div>
+<div><label>Putts</label><input id="putts" type="hidden"><div id="puttsButtons" class="num-buttons">
+<button type="button" class="num-btn putt-btn" onclick="setPutts(0,this)">0</button><button type="button" class="num-btn putt-btn" onclick="setPutts(1,this)">1</button><button type="button" class="num-btn putt-btn" onclick="setPutts(2,this)">2</button><button type="button" class="num-btn putt-btn" onclick="setPutts(3,this)">3</button><button type="button" class="num-btn putt-btn" onclick="setPutts(4,this)">4</button>
+</div></div></div>
 
 <div style="margin-top:12px"><label>Første putt-længde</label><div class="row" id="puttDistance">
 <button class="pill pd" data-value="" onclick="setPuttDist(this)">—</button><button class="pill pd" data-value="K" onclick="setPuttDist(this)">Kort &lt;3 m</button>
@@ -71,7 +80,10 @@ function blankHole(){return {points:null,putts:null,puttDist:"",free2:false,gir:
 function hideAll(){setup.classList.add('hidden');holeCard.classList.add('hidden');overviewCard.classList.add('hidden');summaryCard.classList.add('hidden')}
 function startRound(){round={date:date.value,course:course.value,tee:tee.value,hcp:hcp.value,holes:Array.from({length:18},blankHole)};currentHole=0;returnToOverview=false;hideAll();holeCard.classList.remove('hidden');loadHole()}
 function saveCurrent(){if(!round)return;let h=round.holes[currentHole];h.points=points.value===""?null:Number(points.value);h.putts=putts.value===""?null:Number(putts.value);h.puttDist=puttDist;h.free2=free2.checked;h.gir=gir.checked;h.approach=approach.value;h.teeError=teeError.value;h.penalty=Number(penalty.value||0);h.tops=Number(tops.value||0);h.note=note.value.trim()}
-function loadHole(){let h=round.holes[currentHole];holeNo.textContent=currentHole+1;points.value=h.points??"";putts.value=h.putts??"";puttDist=h.puttDist||"";document.querySelectorAll('.pd').forEach(b=>b.classList.toggle('active',b.dataset.value===puttDist));free2.checked=h.free2;gir.checked=h.gir;approach.value=h.approach||"";teeError.value=h.teeError||"";penalty.value=h.penalty||0;tops.value=h.tops||0;note.value=h.note||""}
+function loadHole(){let h=round.holes[currentHole];holeNo.textContent=currentHole+1;points.value=h.points??"";putts.value=h.putts??"";markNumButtons(".point-btn",h.points);markNumButtons(".putt-btn",h.putts);puttDist=h.puttDist||"";document.querySelectorAll('.pd').forEach(b=>b.classList.toggle('active',b.dataset.value===puttDist));free2.checked=h.free2;gir.checked=h.gir;approach.value=h.approach||"";teeError.value=h.teeError||"";penalty.value=h.penalty||0;tops.value=h.tops||0;note.value=h.note||""}
+function markNumButtons(cls,val){document.querySelectorAll(cls).forEach(b=>b.classList.toggle('active',Number(b.textContent)===Number(val)))}
+function setPoints(v,b){points.value=v;markNumButtons('.point-btn',v);document.getElementById('puttsButtons').scrollIntoView({behavior:'smooth',block:'center'})}
+function setPutts(v,b){putts.value=v;markNumButtons('.putt-btn',v);document.getElementById('puttDistance').scrollIntoView({behavior:'smooth',block:'center'})}
 function setPuttDist(b){puttDist=b.dataset.value;document.querySelectorAll('.pd').forEach(x=>x.classList.toggle('active',x===b))}
 function prevHole(){saveCurrent();if(currentHole>0){currentHole--;loadHole()}}
 function nextHole(){saveCurrent();if(returnToOverview){openOverview();return}if(currentHole<17){currentHole++;loadHole()}else renderSummary()}
