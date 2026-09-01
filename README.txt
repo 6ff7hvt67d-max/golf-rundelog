@@ -1,12 +1,10 @@
-Golf Rundelog v1.12
+Golf Rundelog v1.13
 
-Sikkerhed og historik:
-- Ny Backup-knap eksporterer ALLE gemte runder med ALLE 18 hullers registreringer til JSON.
-- Ny Importér backup kan gendanne hele databasen.
-- Import bevarer eksisterende runder og undgår identiske dubletter.
-- Gemte runder kan åbnes med Se oversigt og ses hul for hul.
-- Gemte runder kan rettes og gemmes tilbage uden at skabe en ny kopi.
-- Tee-fejl indeholder nu Strafområde.
-- Den almindelige CSV-eksport bevares til statistik/analyse.
-
-Vigtigt: Tag en Backup før fremtidige app-opdateringer.
+Rettet:
+- Hver gemt runde har nu tydeligt "Se oversigt" og "Slet runde".
+- "Se oversigt" viser hul-for-hul data fra den gemte runde.
+- Fra oversigten kan du vælge "Ret runde".
+- En rettet runde erstatter den gamle og laver ikke en dublet.
+- Importér backup vises som en rigtig knap.
+- Backup/Import fra v1.12 er bevaret.
+- Strafområde under Tee-fejl er bevaret.
