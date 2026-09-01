@@ -1,9 +1,6 @@
-Golf Rundelog v1.10
-
-Rettet:
-- Historik er nu en rigtig separat visning.
-- Tryk på Historik skjuler Ny runde og viser kun gemte runder.
-- Tryk på Ny runde skjuler Historik og viser startskærmen.
-- Efter Gem runde åbnes Historik automatisk.
-- Gemte runder og enkeltsletning er bevaret.
-- Øvrige funktioner fra v1.9 er uændrede.
+Golf Rundelog v1.11
+- Gemte runder kan åbnes med "Se oversigt".
+- Oversigten viser hul-for-hul registreringer.
+- Gemte runder kan åbnes til rettelse og gemmes tilbage uden dublet.
+- Tee-fejl har fået "Strafområde".
+- Strafslag registreres fortsat separat.
