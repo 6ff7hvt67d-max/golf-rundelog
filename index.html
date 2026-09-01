@@ -19,13 +19,13 @@ button{border:0;border-radius:10px;padding:11px 14px;font-weight:600;cursor:poin
 table{border-collapse:collapse;width:100%;font-size:12px}th,td{border:1px solid var(--line);padding:7px 6px;text-align:center;white-space:nowrap}th{background:#eef3ef}
 tr.editable{cursor:pointer}.toolbar{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.badge{display:inline-block;padding:3px 7px;border-radius:999px;background:#e8eee9;font-size:11px}
 footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px solid var(--line);padding:8px 12px;display:flex;gap:8px;justify-content:center}footer button{flex:1;max-width:240px}
-.num-buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.import-label{display:inline-flex;align-items:center;justify-content:center;cursor:pointer}.num-buttons{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .num-btn{background:#fff;border:1px solid var(--line);padding:12px 4px;border-radius:10px;font-size:18px}
 .num-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
 @media(min-width:620px){.summary{grid-template-columns:repeat(4,1fr)}}
 </style></head>
 <body>
-<header><b>Golf Rundelog v1.11</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.12</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -73,7 +73,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 <h2 id="savedRoundTitle">Gemt runde</h2>
 <div class="tablewrap"><table><thead><tr><th>Hul</th><th>Pt</th><th>Putts</th><th>1. putt</th><th>Frit 2.</th><th>Tee-fejl</th><th>Straf</th><th>Top</th><th>GIR</th><th>Approach</th></tr></thead><tbody id="savedRoundBody"></tbody></table></div>
 <div class="nav"><button class="secondary" onclick="showHistory()">← Historik</button><button class="primary" id="editSavedBtn">Ret runde</button></div>
-</section><section id="historyCard" class="card hidden"><h2>Gemte runder</h2><div id="history" class="small">Ingen gemte runder endnu.</div><div class="grid2" style="margin-top:10px"><button class="secondary" onclick="exportCSV()">Eksportér CSV</button><button class="danger" onclick="clearHistory()">Slet alle</button></div></section>
+</section><section id="historyCard" class="card hidden"><h2>Gemte runder</h2><div id="history" class="small">Ingen gemte runder endnu.</div><div class="grid2" style="margin-top:10px"><button class="secondary" onclick="exportCSV()">Eksportér CSV</button><button class="secondary" onclick="exportBackup()">Backup</button><label class="secondary import-label">Importér backup<input id="backupFile" type="file" accept=".json,application/json" onchange="importBackup(event)" hidden></label><button class="danger" onclick="clearHistory()">Slet alle</button></div></section>
 </main>
 <footer><button class="secondary" onclick="showSetup()">Ny runde</button><button class="primary" onclick="showHistory()">Historik</button></footer>
 
@@ -103,6 +103,7 @@ const historyList=document.getElementById("history");
 function getRounds(){return JSON.parse(localStorage.getItem('golfRounds')||'[]')}function setRounds(r){localStorage.setItem('golfRounds',JSON.stringify(r))}
 function saveRound(){let r=getRounds();if(Number.isInteger(round._editIndex)){const i=round._editIndex;delete round._editIndex;r[i]=round}else{r.unshift(round)}setRounds(r);renderHistory();alert("Runden er gemt på denne enhed.");showHistory()}
 function renderHistory(){let r=getRounds();if(!r.length){historyList.innerHTML="Ingen gemte runder endnu.";return}historyList.innerHTML=r.map((x,i)=>{x.holes.forEach(h=>{if(h.approach===undefined)h.approach=""});let s=calc(x);return `<div class="history-item"><b>${x.date} · ${x.course} · tee ${x.tee}</b><br>${s.pts} point · ${s.putts} putts · ${s.three} × 3-putt+ · ${s.free} frie 2. slag · ${s.gir} GIR · ${s.pen} straf · ${s.tops} top/fedt<br><span class="small">Approach: Green ${s.a.G} · Kort ${s.a.K} · Lang ${s.a.L} · V ${s.a.V} · H ${s.a.H}</span><br><button class="danger" onclick="deleteRound(${i})" style="margin-top:6px">Slet runde</button></div>`}).join("")}
+
 function openSavedRound(i){
  const rs=getRounds(),r=rs[i]; if(!r)return;
  hideAll(); savedRoundCard.classList.remove('hidden');
@@ -119,6 +120,32 @@ function editSavedRound(i){
  const rs=getRounds(); if(!rs[i])return;
  round=JSON.parse(JSON.stringify(rs[i])); round._editIndex=i; currentHole=0;
  hideAll(); holeCard.classList.remove('hidden'); loadHole(); window.scrollTo({top:0,behavior:'smooth'});
+}
+function exportBackup(){
+ const payload={app:"Golf Rundelog",version:"1.12",exportedAt:new Date().toISOString(),rounds:getRounds()};
+ const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+ const a=document.createElement("a");a.href=URL.createObjectURL(blob);
+ a.download=`golf-rundelog-backup-${new Date().toISOString().slice(0,10)}.json`;
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(a.href),1000);
+}
+function importBackup(ev){
+ const f=ev.target.files&&ev.target.files[0]; if(!f)return;
+ const reader=new FileReader();
+ reader.onload=()=>{
+   try{
+     const data=JSON.parse(reader.result);
+     const incoming=Array.isArray(data)?data:data.rounds;
+     if(!Array.isArray(incoming))throw new Error("Ugyldig backup");
+     if(!confirm(`Importér ${incoming.length} gemte runder? Eksisterende runder bevares.`))return;
+     const existing=getRounds();
+     const key=r=>JSON.stringify([r.date,r.course,r.tee,r.hcp,r.holes]);
+     const seen=new Set(existing.map(key));
+     incoming.forEach(r=>{if(r&&Array.isArray(r.holes)&&!seen.has(key(r))){existing.push(r);seen.add(key(r));}});
+     setRounds(existing);renderHistory();showHistory();alert("Backup er importeret.");
+   }catch(e){alert("Backup-filen kunne ikke læses.");}
+   ev.target.value="";
+ };
+ reader.readAsText(f);
 }
 function deleteRound(i){let r=getRounds();if(!r[i])return;if(confirm("Vil du slette denne runde?")){r.splice(i,1);setRounds(r);renderHistory()}}function clearHistory(){if(confirm("Slette alle gemte runder?")){localStorage.removeItem('golfRounds');renderHistory()}}
 function exportCSV(){let r=getRounds();if(!r.length){alert("Ingen runder at eksportere.");return}let rows=[["Dato","Bane","Tee","HCP","Stableford","Putts","1-putts","3-putts+","Frie 2. slag","GIR","Strafslag","Top/fedt","Approach Green","Approach Kort","Approach Lang","Approach Venstre","Approach Højre"]];r.forEach(x=>{x.holes.forEach(h=>{if(h.approach===undefined)h.approach=""});let s=calc(x);rows.push([x.date,x.course,x.tee,x.hcp,s.pts,s.putts,s.one,s.three,s.free,s.gir,s.pen,s.tops,s.a.G,s.a.K,s.a.L,s.a.V,s.a.H])});let csv=rows.map(a=>a.map(v=>`"${String(v).replaceAll('"','""')}"`).join(";")).join("\n");let blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="golf_runder.csv";a.click()}
