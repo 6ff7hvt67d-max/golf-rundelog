@@ -1,7 +1,7 @@
-Golf Rundelog v1.8
+Golf Rundelog v1.9
 
 Rettet:
-- Dato og Bane står igen på samme linje.
-- Begge felter har fast 50/50 plads på mobil og kan ikke overlappe.
-- Tee og Handicap står fortsat på samme linje.
-- Historikrettelsen og øvrige funktioner fra v1.7 er bevaret.
+- iPhones native dato-felt er erstattet af et almindeligt tekstfelt.
+- Dato vises i format dd-mm-åååå.
+- Dato og Bane kan nu stå stabilt side om side uden overlap.
+- Øvrige funktioner fra v1.8 er bevaret.
