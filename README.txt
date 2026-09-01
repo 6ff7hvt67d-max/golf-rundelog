@@ -1,11 +1,7 @@
-Golf Rundelog v1.7
+Golf Rundelog v1.8
 
 Rettet:
-- Dato og Bane står nu under hinanden på iPhone, så de ikke kan overlappe.
-- Historik-knappen og visning af gemte runder er rettet.
-  Årsagen var en navnekonflikt med browserens indbyggede 'history'-objekt.
-- Enkeltsletning af gemte runder er bevaret.
-- 0 putts vælger fortsat 'Ingen' automatisk.
-- Forrige / Oversigt / Næste er fortsat placeret over bundmenuen.
-
-Øvrige funktioner fra v1.6 er bevaret.
+- Dato og Bane står igen på samme linje.
+- Begge felter har fast 50/50 plads på mobil og kan ikke overlappe.
+- Tee og Handicap står fortsat på samme linje.
+- Historikrettelsen og øvrige funktioner fra v1.7 er bevaret.
