@@ -25,7 +25,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 @media(min-width:620px){.summary{grid-template-columns:repeat(4,1fr)}}
 </style></head>
 <body>
-<header><b>Golf Rundelog v1.14</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.15</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -231,7 +231,19 @@ function importBackup(event){
   reader.readAsText(file);
 }
 
-function showSetup(){hideAll();setup.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function setTodayIfEmpty(){
+  const el=document.getElementById('date');
+  if(!el || el.value.trim()) return;
+  const d=new Date();
+  const dd=String(d.getDate()).padStart(2,'0');
+  const mm=String(d.getMonth()+1).padStart(2,'0');
+  const yyyy=d.getFullYear();
+  el.value=`${dd}-${mm}-${yyyy}`;
+}
+
+function showSetup(){setTodayIfEmpty();hideAll();setup.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
 function showHistory(){renderHistory();hideAll();historyCard.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
 renderHistory();showSetup();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
+
+setTodayIfEmpty();
 </script></body></html>
