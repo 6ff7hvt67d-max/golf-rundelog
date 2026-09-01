@@ -9,8 +9,8 @@
 *{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink)}
 header{background:var(--accent);color:#fff;padding:14px 16px;position:sticky;top:0;z-index:10}
 main{max-width:920px;margin:auto;padding:12px 12px 90px}.card{background:#fff;border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
-.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
-input,select,button{font:inherit}input,select{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}
+.grid2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:10px}.grid2>*{min-width:0}label{display:block;font-size:12px;color:var(--muted);margin-bottom:4px}
+input,select,button{font:inherit}input,select{width:100%;min-width:0;max-width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;background:#fff}input[type=date]{min-width:0;-webkit-appearance:none;appearance:none}
 button{border:0;border-radius:10px;padding:11px 14px;font-weight:600;cursor:pointer}.primary{background:var(--accent);color:#fff}.secondary{background:#e8eee9}.danger{background:#fdecea;color:var(--danger)}
 .hidden{display:none!important}.row{display:flex;gap:8px;flex-wrap:wrap}.pill{border:1px solid var(--line);background:white;border-radius:999px;padding:9px 11px}.pill.active{background:var(--accent);color:white}
 .check{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:12px;color:var(--ink);font-size:15px;margin:0;min-height:52px}.check input{width:auto;flex:0 0 auto;margin:0;transform:scale(1.15)}.summary{display:grid;grid-template-columns:1fr 1fr;gap:8px}
@@ -25,7 +25,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 @media(min-width:620px){.summary{grid-template-columns:repeat(4,1fr)}}
 </style></head>
 <body>
-<header><b>Golf Rundelog v1.4</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.5</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="grid2">
 <div><label>Dato</label><input id="date" type="date"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -69,7 +69,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 <div id="approachSummary" class="card" style="margin-top:12px;background:#f8faf8"></div>
 <div class="nav"><button class="secondary" onclick="openOverview()">Ret runden</button><button class="primary" onclick="saveRound()">Gem runde</button></div></section>
 
-<section class="card"><h2>Gemte runder</h2><div id="history" class="small">Ingen gemte runder endnu.</div><div class="grid2" style="margin-top:10px"><button class="secondary" onclick="exportCSV()">Eksportér CSV</button><button class="danger" onclick="clearHistory()">Slet alle</button></div></section>
+<section class="card"><h2>Gemte runder</h2><div id="history" class="small">Ingen gemte runder endnu.</div><div class="grid2" style="margin-top:10px"><button class="secondary" onclick="exportCSV()">Eksportér CSV</button><button id="deleteAllBtn" class="secondary" style="color:var(--danger)" onclick="clearHistory()">Slet alle</button></div></section>
 </main>
 <footer><button class="secondary" onclick="showSetup()">Ny runde</button><button class="primary" onclick="showHistory()">Historik</button></footer>
 
@@ -97,8 +97,9 @@ function renderOverview(){overviewBody.innerHTML=round.holes.map((h,i)=>`<tr cla
 function renderSummary(){if(!round)return;if(!holeCard.classList.contains('hidden'))saveCurrent();hideAll();summaryCard.classList.remove('hidden');let s=calc(round);summaryHead.textContent=`${round.course} · tee ${round.tee} · HCP ${round.hcp} · ${round.date}`;let vals=[["Stableford",s.pts],["Putts",s.putts],["1-putts",s.one],["3-putts+",s.three],["Frie 2. slag",s.free],["GIR",s.gir],["Strafslag",s.pen],["Top/fedt",s.tops],["3-putts efter langt 1.putt",s.long3]];metrics.innerHTML=vals.map(v=>`<div class="metric"><span class="small">${v[0]}</span><b>${v[1]}</b></div>`).join("");let total=s.a.G+s.a.K+s.a.L+s.a.V+s.a.H;approachSummary.innerHTML=`<b>Approach</b><div class="small" style="margin-top:6px">Registrerede forsøg: ${total}</div><div style="margin-top:7px">Green: <b>${s.a.G}</b> · Kort: <b>${s.a.K}</b> · Lang: <b>${s.a.L}</b> · Venstre: <b>${s.a.V}</b> · Højre: <b>${s.a.H}</b></div>`}
 function getRounds(){return JSON.parse(localStorage.getItem('golfRounds')||'[]')}function setRounds(r){localStorage.setItem('golfRounds',JSON.stringify(r))}
 function saveRound(){let r=getRounds();r.unshift(round);setRounds(r);renderHistory();alert("Runden er gemt på denne enhed.")}
-function renderHistory(){let r=getRounds();if(!r.length){history.innerHTML="Ingen gemte runder endnu.";return}history.innerHTML=r.map((x,i)=>{x.holes.forEach(h=>{if(h.approach===undefined)h.approach=""});let s=calc(x);return `<div class="history-item"><b>${x.date} · ${x.course} · tee ${x.tee}</b><br>${s.pts} point · ${s.putts} putts · ${s.three} × 3-putt+ · ${s.free} frie 2. slag · ${s.gir} GIR · ${s.pen} straf · ${s.tops} top/fedt<br><span class="small">Approach: Green ${s.a.G} · Kort ${s.a.K} · Lang ${s.a.L} · V ${s.a.V} · H ${s.a.H}</span><br><button class="danger" onclick="deleteRound(${i})" style="margin-top:6px">Slet runde</button></div>`}).join("")}
-function deleteRound(i){let r=getRounds();r.splice(i,1);setRounds(r);renderHistory()}function clearHistory(){if(confirm("Slette alle gemte runder?")){localStorage.removeItem('golfRounds');renderHistory()}}
+function renderHistory(){let r=getRounds();let allBtn=document.getElementById('deleteAllBtn');if(!r.length){history.innerHTML="Ingen gemte runder endnu.";if(allBtn)allBtn.classList.add('hidden');return}if(allBtn)allBtn.classList.remove('hidden');history.innerHTML=r.map((x,i)=>{x.holes.forEach(h=>{if(h.approach===undefined)h.approach=""});let s=calc(x);return `<div class="history-item"><b>${x.date} · ${x.course} · tee ${x.tee}</b><br>${s.pts} point · ${s.putts} putts · ${s.three} × 3-putt+ · ${s.free} frie 2. slag · ${s.gir} GIR · ${s.pen} straf · ${s.tops} top/fedt<br><span class="small">Approach: Green ${s.a.G} · Kort ${s.a.K} · Lang ${s.a.L} · V ${s.a.V} · H ${s.a.H}</span><br><button class="danger" onclick="deleteRound(${i})" style="margin-top:8px">Slet denne runde</button></div>`}).join("")}
+function deleteRound(i){let r=getRounds();let x=r[i];if(!x)return;let navn=`${x.date} · ${x.course}`;if(confirm(`Vil du slette denne runde?\n\n${navn}`)){r.splice(i,1);setRounds(r);renderHistory()}}
+function clearHistory(){if(confirm("Vil du slette ALLE gemte runder?\n\nDette kan ikke fortrydes.")){localStorage.removeItem('golfRounds');renderHistory()}}
 function exportCSV(){let r=getRounds();if(!r.length){alert("Ingen runder at eksportere.");return}let rows=[["Dato","Bane","Tee","HCP","Stableford","Putts","1-putts","3-putts+","Frie 2. slag","GIR","Strafslag","Top/fedt","Approach Green","Approach Kort","Approach Lang","Approach Venstre","Approach Højre"]];r.forEach(x=>{x.holes.forEach(h=>{if(h.approach===undefined)h.approach=""});let s=calc(x);rows.push([x.date,x.course,x.tee,x.hcp,s.pts,s.putts,s.one,s.three,s.free,s.gir,s.pen,s.tops,s.a.G,s.a.K,s.a.L,s.a.V,s.a.H])});let csv=rows.map(a=>a.map(v=>`"${String(v).replaceAll('"','""')}"`).join(";")).join("\n");let blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="golf_runder.csv";a.click()}
 function showSetup(){hideAll();setup.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}function showHistory(){history.scrollIntoView({behavior:'smooth'})}
 renderHistory();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
