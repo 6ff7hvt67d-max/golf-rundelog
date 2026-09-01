@@ -1,10 +1,9 @@
-Golf Rundelog v1.5
+Golf Rundelog v1.6
 
-Rettet:
-- Dato og Bane overlapper ikke længere på iPhone/mobil.
-- Hver gemt runde kan slettes enkeltvis.
-- Sletning af en enkelt runde kræver bekræftelse.
-- "Slet alle" er gjort mindre fremtrædende, skjules når der ikke er gemte runder,
-  og kræver tydelig bekræftelse.
-
-Øvrige funktioner fra v1.4 er uændrede.
+- Dato/Bane overlap på mobil er rettet.
+- Enkelte gemte runder kan slettes med bekræftelse.
+- Slet alle kræver fortsat bekræftelse.
+- Forrige / Oversigt / Næste holdes synligt over bundmenuen.
+- Første putt-længde "—" er ændret til "Ingen".
+- Ved 0 putts vælges "Ingen" automatisk.
+- Store 0-4 knapper til Point og Putts er bevaret.
