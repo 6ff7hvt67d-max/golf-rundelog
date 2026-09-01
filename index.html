@@ -25,7 +25,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 @media(min-width:620px){.summary{grid-template-columns:repeat(4,1fr)}}
 </style></head>
 <body>
-<header><b>Golf Rundelog v1.13</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.14</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -53,7 +53,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 <option value="">Ikke registreret / ikke relevant</option><option value="G">Green ✓</option><option value="K">Kort</option><option value="L">Lang</option><option value="V">Venstre</option><option value="H">Højre</option>
 </select><div class="small" style="margin-top:4px">Registrér kun et slag, hvor hensigten var at ramme green.</div></div>
 
-<div style="margin-top:12px"><label>Tee-fejl</label><select id="teeError"><option value="">Ingen / ikke relevant</option><option value="S">Slice / hook</option><option value="K">Kort drive</option><option value="B">Bunker</option><option value="OB">Out of bounds</option></select></div>
+<div style="margin-top:12px"><label>Tee-fejl</label><select id="teeError"><option value="">Ingen / ikke relevant</option><option value="S">Slice / hook</option><option value="K">Kort drive</option><option value="B">Bunker</option><option value="OB">Out of bounds</option><option value="P">Strafområde</option></select></div>
 <div class="grid2" style="margin-top:12px"><div><label>Strafslag</label><input id="penalty" type="number" min="0" value="0"></div><div><label>Toppede/fede slag</label><input id="tops" type="number" min="0" value="0"></div></div>
 <div style="margin-top:12px"><label>Kort note</label><input id="note" placeholder="fx skævt leje, svært slag..."></div>
 <div class="nav hole-nav"><button class="secondary" onclick="prevHole()">← Forrige</button><button class="secondary" onclick="openOverview()">Oversigt</button><button class="primary" onclick="nextHole()">Næste →</button></div>
@@ -73,7 +73,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 <h2 id="savedRoundTitle">Gemt runde</h2>
 <div class="tablewrap"><table><thead><tr><th>Hul</th><th>Pt</th><th>Putts</th><th>1. putt</th><th>Frit 2.</th><th>Tee-fejl</th><th>Straf</th><th>Top</th><th>GIR</th><th>Approach</th></tr></thead><tbody id="savedRoundBody"></tbody></table></div>
 <div class="nav"><button class="secondary" onclick="showHistory()">← Historik</button><button class="primary" id="editSavedBtn">Ret runde</button></div>
-</section><section id="historyCard" class="card hidden"><h2>Gemte runder</h2><div id="history" class="small">Ingen gemte runder endnu.</div><div class="grid2" style="margin-top:10px"><button class="secondary" onclick="exportCSV()">Eksportér CSV</button><button class="secondary" onclick="exportBackup()">Backup</button><label class="secondary import-label">Importér backup<input id="backupFile" type="file" accept=".json,application/json" onchange="importBackup(event)" hidden></label><button class="danger" onclick="clearHistory()">Slet alle</button></div></section>
+</section><section id="historyCard" class="card hidden"><h2>Gemte runder</h2><div id="history" class="small">Ingen gemte runder endnu.</div><div class="grid2" style="margin-top:10px"><button class="secondary" onclick="exportCSV()">Eksportér CSV</button><button class="secondary" onclick="exportBackup()">Backup</button><button class="secondary" type="button" onclick="document.getElementById('backupFile').click()">Importér backup</button><input id="backupFile" type="file" accept=".json,application/json" style="display:none" onchange="importBackup(event)"><button class="danger" onclick="clearHistory()">Slet alle</button></div></section>
 </main>
 <footer><button class="secondary" onclick="showSetup()">Ny runde</button><button class="primary" onclick="showHistory()">Historik</button></footer>
 
@@ -124,6 +124,113 @@ function renderHistory(){
 }
 function clearHistory(){if(confirm("Slette alle gemte runder?")){localStorage.removeItem('golfRounds');renderHistory()}}
 function exportCSV(){let r=getRounds();if(!r.length){alert("Ingen runder at eksportere.");return}let rows=[["Dato","Bane","Tee","HCP","Stableford","Putts","1-putts","3-putts+","Frie 2. slag","GIR","Strafslag","Top/fedt","Approach Green","Approach Kort","Approach Lang","Approach Venstre","Approach Højre"]];r.forEach(x=>{x.holes.forEach(h=>{if(h.approach===undefined)h.approach=""});let s=calc(x);rows.push([x.date,x.course,x.tee,x.hcp,s.pts,s.putts,s.one,s.three,s.free,s.gir,s.pen,s.tops,s.a.G,s.a.K,s.a.L,s.a.V,s.a.H])});let csv=rows.map(a=>a.map(v=>`"${String(v).replaceAll('"','""')}"`).join(";")).join("\n");let blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="golf_runder.csv";a.click()}
+
+function openSavedRound(i){
+  const rs=getRounds(), r=rs[i];
+  if(!r)return;
+  hideAll();
+  savedRoundCard.classList.remove('hidden');
+  savedRoundTitle.textContent=`${r.date||''} · ${r.course||''} · tee ${r.tee||''}`;
+  savedRoundBody.innerHTML=(r.holes||[]).map((h,j)=>`<tr>
+    <td>${j+1}</td>
+    <td>${h.points??''}</td>
+    <td>${h.putts??''}</td>
+    <td>${h.puttDist==='S'?'Kort':h.puttDist==='M'?'Mellem':h.puttDist==='L'?'Over 8 m':(Number(h.putts)===0?'Ingen':'')}</td>
+    <td>${h.free2?'✓':''}</td>
+    <td>${h.teeError==='P'?'Strafområde':(h.teeError||'')}</td>
+    <td>${h.penalty??0}</td>
+    <td>${h.tops??0}</td>
+    <td>${h.gir?'✓':''}</td>
+    <td>${h.approach==='G'?'Green':h.approach==='K'?'Kort':h.approach==='L'?'Lang':h.approach==='V'?'Venstre':h.approach==='H'?'Højre':''}</td>
+  </tr>`).join('');
+  editSavedBtn.onclick=()=>editSavedRound(i);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function editSavedRound(i){
+  const rs=getRounds();
+  if(!rs[i])return;
+  round=JSON.parse(JSON.stringify(rs[i]));
+  round._editIndex=i;
+  currentHole=0;
+  hideAll();
+  holeCard.classList.remove('hidden');
+  loadHole();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+function deleteRound(i){
+  const r=getRounds();
+  if(!r[i])return;
+  if(confirm("Vil du slette denne runde?")){
+    r.splice(i,1);
+    setRounds(r);
+    renderHistory();
+  }
+}
+
+function exportBackup(){
+  try{
+    const payload={
+      app:"Golf Rundelog",
+      version:"1.14",
+      exportedAt:new Date().toISOString(),
+      rounds:getRounds()
+    };
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url;
+    a.download="golf-rundelog-backup-"+new Date().toISOString().slice(0,10)+".json";
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+  }catch(e){
+    alert("Backup kunne ikke oprettes.");
+  }
+}
+
+function importBackup(event){
+  const input=event.target;
+  const file=input.files&&input.files[0];
+  if(!file)return;
+  const reader=new FileReader();
+  reader.onload=function(){
+    try{
+      const data=JSON.parse(reader.result);
+      const incoming=Array.isArray(data)?data:data.rounds;
+      if(!Array.isArray(incoming))throw new Error("Ugyldig backup");
+      if(!confirm("Importér "+incoming.length+" runder? Eksisterende runder bevares.")){
+        input.value="";
+        return;
+      }
+      const existing=getRounds();
+      const fp=r=>JSON.stringify([r.date,r.course,r.tee,r.hcp,r.holes]);
+      const seen=new Set(existing.map(fp));
+      let added=0;
+      incoming.forEach(r=>{
+        if(r&&Array.isArray(r.holes)){
+          const key=fp(r);
+          if(!seen.has(key)){
+            existing.push(r);
+            seen.add(key);
+            added++;
+          }
+        }
+      });
+      setRounds(existing);
+      renderHistory();
+      showHistory();
+      alert(added+" runde(r) importeret.");
+    }catch(e){
+      alert("Backup-filen kunne ikke læses.");
+    }
+    input.value="";
+  };
+  reader.readAsText(file);
+}
+
 function showSetup(){hideAll();setup.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
 function showHistory(){renderHistory();hideAll();historyCard.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
 renderHistory();showSetup();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
