@@ -25,12 +25,15 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 @media(min-width:620px){.summary{grid-template-columns:repeat(4,1fr)}}
 </style></head>
 <body>
-<header><b>Golf Rundelog v1.16</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.17</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
 <div><label>Tee</label><input id="tee" value="52"></div><div><label>Handicap</label><input id="hcp" type="number" step="0.1" value="29.9"></div>
-</div><button class="primary" style="width:100%;margin-top:12px" onclick="startRound()">Start runde</button></section>
+</div><div id="resumeDraftSetup" class="hidden" style="margin:10px 0">
+  <button class="secondary" type="button" onclick="resumeDraft()" style="width:100%">Fortsæt igangværende runde</button>
+</div>
+<button class="primary" style="width:100%;margin-top:12px" onclick="startRound()">Start runde</button></section>
 
 <section id="holeCard" class="card hidden">
 <div style="display:flex;justify-content:space-between;align-items:center"><h2>Registrering</h2><b>Hul <span id="holeNo">1</span>/18</b></div>
@@ -73,21 +76,78 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 <h2 id="savedRoundTitle">Gemt runde</h2>
 <div class="tablewrap"><table><thead><tr><th>Hul</th><th>Pt</th><th>Putts</th><th>1. putt</th><th>Frit 2.</th><th>Tee-fejl</th><th>Straf</th><th>Top</th><th>GIR</th><th>Approach</th></tr></thead><tbody id="savedRoundBody"></tbody></table></div>
 <div class="nav"><button class="secondary" onclick="showHistory()">← Historik</button><button class="primary" id="editSavedBtn">Ret runde</button></div>
-</section><section id="historyCard" class="card hidden"><h2>Gemte runder</h2><div id="history" class="small">Ingen gemte runder endnu.</div><div class="grid2" style="margin-top:10px"><button class="secondary" onclick="exportCSV()">Eksportér CSV</button><button class="secondary" onclick="exportBackup()">Backup</button><button class="secondary" type="button" onclick="document.getElementById('backupFile').click()">Importér backup</button><input id="backupFile" type="file" accept=".json,application/json" style="display:none" onchange="importBackup(event)"><button class="danger" onclick="clearHistory()">Slet alle</button></div></section>
+</section><section id="historyCard" class="card hidden"><h2>Gemte runder</h2>
+<div id="resumeDraftHistory" class="hidden" style="margin-bottom:12px">
+  <button class="primary" type="button" onclick="resumeDraft()" style="width:100%">Fortsæt igangværende runde</button>
+  <div class="small" style="margin-top:6px">Din igangværende runde er gemt automatisk.</div>
+</div><div id="history" class="small">Ingen gemte runder endnu.</div><div class="grid2" style="margin-top:10px"><button class="secondary" onclick="exportCSV()">Eksportér CSV</button><button class="secondary" onclick="exportBackup()">Backup</button><button class="secondary" type="button" onclick="document.getElementById('backupFile').click()">Importér backup</button><input id="backupFile" type="file" accept=".json,application/json" style="display:none" onchange="importBackup(event)"><button class="danger" onclick="clearHistory()">Slet alle</button></div></section>
 </main>
 <footer><button class="secondary" onclick="showSetup()">Ny runde</button><button class="primary" onclick="showHistory()">Historik</button></footer>
 
 <script>
 let round=null,currentHole=0,puttDist="",returnToOverview=false;
+const DRAFT_KEY="golfCurrentRoundDraftV1";
+
+function writeDraft(){
+  if(!round) return;
+  try{
+    localStorage.setItem(DRAFT_KEY,JSON.stringify({
+      round:round,
+      currentHole:currentHole,
+      savedAt:new Date().toISOString()
+    }));
+  }catch(e){}
+  updateDraftButtons();
+}
+
+function readDraft(){
+  try{
+    const x=JSON.parse(localStorage.getItem(DRAFT_KEY)||"null");
+    if(x && x.round && Array.isArray(x.round.holes)) return x;
+  }catch(e){}
+  return null;
+}
+
+function clearDraft(){
+  try{localStorage.removeItem(DRAFT_KEY)}catch(e){}
+  updateDraftButtons();
+}
+
+function updateDraftButtons(){
+  const has=!!readDraft();
+  const a=document.getElementById("resumeDraftHistory");
+  const b=document.getElementById("resumeDraftSetup");
+  if(a)a.classList.toggle("hidden",!has);
+  if(b)b.classList.toggle("hidden",!has);
+}
+
+function resumeDraft(){
+  const d=readDraft();
+  if(!d){alert("Der er ingen igangværende runde at fortsætte.");updateDraftButtons();return;}
+  round=d.round;
+  currentHole=Math.max(0,Math.min(17,Number(d.currentHole)||0));
+  returnToOverview=false;
+  hideAll();
+  holeCard.classList.remove("hidden");
+  loadHole();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+
+
 {const d=new Date(),dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0');date.value=`${dd}-${mm}-${d.getFullYear()}`;}
 function blankHole(){return {points:null,putts:null,puttDist:"",free2:false,gir:false,approach:"",teeError:"",penalty:0,tops:0,note:""}}
 function hideAll(){setup.classList.add('hidden');holeCard.classList.add('hidden');overviewCard.classList.add('hidden');summaryCard.classList.add('hidden');historyCard.classList.add('hidden');savedRoundCard.classList.add('hidden')}
-function startRound(){round={date:date.value,course:course.value,tee:tee.value,hcp:hcp.value,holes:Array.from({length:18},blankHole)};currentHole=0;returnToOverview=false;hideAll();holeCard.classList.remove('hidden');loadHole()}
-function saveCurrent(){if(!round)return;let h=round.holes[currentHole];h.points=points.value===""?null:Number(points.value);h.putts=putts.value===""?null:Number(putts.value);h.puttDist=puttDist;h.free2=free2.checked;h.gir=gir.checked;h.approach=approach.value;h.teeError=teeError.value;h.penalty=Number(penalty.value||0);h.tops=Number(tops.value||0);h.note=note.value.trim()}
+function startRound(){
+ const old=readDraft();
+ if(old && !confirm("Der ligger allerede en igangværende runde. Vil du starte en ny og erstatte den?")) return;
+ round={date:date.value,course:course.value,tee:tee.value,hcp:hcp.value,holes:Array.from({length:18},blankHole)};
+ currentHole=0;returnToOverview=false;writeDraft();hideAll();holeCard.classList.remove('hidden');loadHole()
+}
+function saveCurrent(){if(!round)return;let h=round.holes[currentHole];h.points=points.value===""?null:Number(points.value);h.putts=putts.value===""?null:Number(putts.value);h.puttDist=puttDist;h.free2=free2.checked;h.gir=gir.checked;h.approach=approach.value;h.teeError=teeError.value;h.penalty=Number(penalty.value||0);h.tops=Number(tops.value||0);h.note=note.value.trim();writeDraft()}
 function loadHole(){let h=round.holes[currentHole];holeNo.textContent=currentHole+1;points.value=h.points??"";putts.value=h.putts??"";markNumButtons(".point-btn",h.points);markNumButtons(".putt-btn",h.putts);puttDist=h.puttDist||"";document.querySelectorAll('.pd').forEach(b=>b.classList.toggle('active',b.dataset.value===puttDist));free2.checked=h.free2;gir.checked=h.gir;approach.value=h.approach||"";teeError.value=h.teeError||"";penalty.value=h.penalty||0;tops.value=h.tops||0;note.value=h.note||""}
 function markNumButtons(cls,val){document.querySelectorAll(cls).forEach(b=>b.classList.toggle('active',Number(b.textContent)===Number(val)))}
-function setPoints(v,b){points.value=v;markNumButtons('.point-btn',v);document.getElementById('puttsButtons').scrollIntoView({behavior:'smooth',block:'center'})}
-function setPutts(v,b){putts.value=v;markNumButtons('.putt-btn',v);if(v===0){puttDist="";document.querySelectorAll('.pd').forEach(x=>x.classList.toggle('active',x.dataset.value===""));}else if(puttDist===""){document.querySelectorAll('.pd').forEach(x=>x.classList.remove('active'));}document.getElementById('puttDistance').scrollIntoView({behavior:'smooth',block:'center'})}
+function setPoints(v,b){points.value=v;markNumButtons('.point-btn',v);saveCurrent();document.getElementById('puttsButtons').scrollIntoView({behavior:'smooth',block:'center'})}
+function setPutts(v,b){putts.value=v;markNumButtons('.putt-btn',v);if(v===0){puttDist="";document.querySelectorAll('.pd').forEach(x=>x.classList.toggle('active',x.dataset.value===""));}else if(puttDist===""){document.querySelectorAll('.pd').forEach(x=>x.classList.remove('active'));}saveCurrent();document.getElementById('puttDistance').scrollIntoView({behavior:'smooth',block:'center'})}
 function setPuttDist(b){puttDist=b.dataset.value;document.querySelectorAll('.pd').forEach(x=>x.classList.toggle('active',x===b))}
 function prevHole(){saveCurrent();if(currentHole>0){currentHole--;loadHole()}}
 function nextHole(){saveCurrent();if(returnToOverview){openOverview();return}if(currentHole<17){currentHole++;loadHole()}else renderSummary()}
@@ -101,7 +161,7 @@ function renderOverview(){overviewBody.innerHTML=round.holes.map((h,i)=>`<tr cla
 function renderSummary(){if(!round)return;if(!holeCard.classList.contains('hidden'))saveCurrent();hideAll();summaryCard.classList.remove('hidden');let s=calc(round);summaryHead.textContent=`${round.course} · tee ${round.tee} · HCP ${round.hcp} · ${round.date}`;let vals=[["Stableford",s.pts],["Putts",s.putts],["1-putts",s.one],["3-putts+",s.three],["Frie 2. slag",s.free],["GIR",s.gir],["Strafslag",s.pen],["Top/fedt",s.tops],["3-putts efter langt 1.putt",s.long3]];metrics.innerHTML=vals.map(v=>`<div class="metric"><span class="small">${v[0]}</span><b>${v[1]}</b></div>`).join("");let total=s.a.G+s.a.K+s.a.L+s.a.V+s.a.H;approachSummary.innerHTML=`<b>Approach</b><div class="small" style="margin-top:6px">Registrerede forsøg: ${total}</div><div style="margin-top:7px">Green: <b>${s.a.G}</b> · Kort: <b>${s.a.K}</b> · Lang: <b>${s.a.L}</b> · Venstre: <b>${s.a.V}</b> · Højre: <b>${s.a.H}</b></div>`}
 const historyList=document.getElementById("history");
 function getRounds(){return JSON.parse(localStorage.getItem('golfRounds')||'[]')}function setRounds(r){localStorage.setItem('golfRounds',JSON.stringify(r))}
-function saveRound(){let r=getRounds();if(Number.isInteger(round._editIndex)){const i=round._editIndex;delete round._editIndex;r[i]=round}else{r.unshift(round)}setRounds(r);renderHistory();alert("Runden er gemt på denne enhed.");showHistory()}
+function saveRound(){let r=getRounds();if(Number.isInteger(round._editIndex)){const i=round._editIndex;delete round._editIndex;r[i]=round}else{r.unshift(round)}setRounds(r);clearDraft();round=null;renderHistory();alert("Runden er gemt på denne enhed.");showHistory()}
 function renderHistory(){
  const r=getRounds();
  if(!r.length){historyList.innerHTML="Ingen gemte runder endnu.";return}
@@ -241,9 +301,16 @@ function setTodayIfEmpty(){
   el.value=`${dd}-${mm}-${yyyy}`;
 }
 
-function showSetup(){setTodayIfEmpty();hideAll();setup.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
-function showHistory(){renderHistory();hideAll();historyCard.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function showSetup(){setTodayIfEmpty();updateDraftButtons();hideAll();setup.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function showHistory(){if(round&&!holeCard.classList.contains('hidden'))saveCurrent();renderHistory();updateDraftButtons();hideAll();historyCard.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
 renderHistory();showSetup();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
 
 setTodayIfEmpty();
+
+["change","input"].forEach(evt=>{
+  holeCard.addEventListener(evt,e=>{
+    if(round && !e.target.classList.contains("num-btn")) saveCurrent();
+  });
+});
+updateDraftButtons();
 </script></body></html>
