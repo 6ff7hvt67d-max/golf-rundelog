@@ -1,5 +1,5 @@
-const CACHE="golf-rundelog-v1-20";
-const ASSETS=["./","./index.html","./manifest.webmanifest"];
+const CACHE="golf-rundelog-v1-21";
+const ASSETS=["./","./index.html","./vejledning.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));

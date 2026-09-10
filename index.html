@@ -31,7 +31,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
   <button id="applyUpdateBtn" class="primary" type="button" style="width:100%">Opdatér nu</button>
 </div>
 
-<header><b>Golf Rundelog v1.20</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.21</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -95,7 +95,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
   <div class="small" style="margin-top:6px">Din igangværende runde er gemt automatisk.</div>
 </div><div id="history" class="small">Ingen gemte runder endnu.</div><div class="grid2" style="margin-top:10px"><button class="secondary" onclick="exportCSV()">Eksportér CSV</button><button class="secondary" onclick="exportBackup()">Backup</button><button class="secondary" type="button" onclick="document.getElementById('backupFile').click()">Importér backup</button><input id="backupFile" type="file" accept=".json,application/json" style="display:none" onchange="importBackup(event)"><button class="danger" onclick="clearHistory()">Slet alle</button></div></section>
 </main>
-<footer><button class="secondary" onclick="showSetup()">Ny runde</button><button class="primary" onclick="showHistory()">Historik</button></footer>
+<footer><button class="secondary" onclick="showSetup()">Ny runde</button><button class="primary" onclick="showHistory()">Historik</button><button type="button" onclick="window.location.href='./vejledning.html'">Vejledning</button></footer>
 
 <script>
 let round=null,currentHole=0,puttDist="",returnToOverview=false;

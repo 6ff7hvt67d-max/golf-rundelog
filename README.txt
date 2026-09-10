@@ -1,10 +1,9 @@
-Golf Rundelog v1.20
+Golf Rundelog v1.21
 
 NYT:
-- Point og putts står fortsat øverst.
-- Resten følger nu spillets naturlige rækkefølge:
-  Tee-fejl → Ikke frit 2. slag → Approach → GIR → Første putt → Straf/top-fedt.
-- "Frit 2. slag" er vendt om til "Ikke frit 2. slag".
-- Nye huller regnes automatisk som frit 2. slag; du markerer kun undtagelsen.
-- Den eksisterende free2-datamodel er bevaret, så historik, CSV og statistik fortsætter uændret.
-- Alle funktioner fra v1.19, inkl. automatisk opdatering og autosave, er bevaret.
+- Ny Vejledning-knap i appen.
+- Ny side: vejledning.html
+- Vejledningen kan deles direkte som link:
+  https://6ff7hvt67d-max.github.io/golf-rundelog/vejledning.html
+- Vejledningen er også lagt i appens cache, så den kan åbnes efter første indlæsning.
+- Alle funktioner fra v1.20 er bevaret.
