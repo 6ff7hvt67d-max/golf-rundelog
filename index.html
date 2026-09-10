@@ -25,7 +25,13 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 @media(min-width:620px){.summary{grid-template-columns:repeat(4,1fr)}}
 </style></head>
 <body>
-<header><b>Golf Rundelog v1.18</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<div id="updateBanner" class="hidden" style="position:fixed;left:12px;right:12px;top:12px;z-index:9999;background:#fff;border:1px solid #bbb;border-radius:12px;padding:12px;box-shadow:0 4px 18px rgba(0,0,0,.18)">
+  <div style="font-weight:700;margin-bottom:6px">Ny version klar</div>
+  <div class="small" style="margin-bottom:10px">Tryk Opdatér for at hente den nyeste version. Dine gemte runder bliver ikke slettet.</div>
+  <button id="applyUpdateBtn" class="primary" type="button" style="width:100%">Opdatér nu</button>
+</div>
+
+<header><b>Golf Rundelog v1.19</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -349,9 +355,7 @@ function setTodayIfEmpty(){
 
 function showSetup(){setTodayIfEmpty();updateDraftButtons();hideAll();setup.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
 function showHistory(){if(round&&!holeCard.classList.contains('hidden'))saveCurrent();renderHistory();updateDraftButtons();hideAll();historyCard.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
-renderHistory();showSetup();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))navigator.serviceWorker.register('./sw.js').catch(()=>{});
-
-setTodayIfEmpty();
+renderHistory();showSetup();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))setTodayIfEmpty();
 
 ["change","input"].forEach(evt=>{
   holeCard.addEventListener(evt,e=>{
@@ -359,4 +363,69 @@ setTodayIfEmpty();
   });
 });
 updateDraftButtons();
+
+
+let swRegistration=null;
+
+function showUpdateBanner(){
+  const b=document.getElementById("updateBanner");
+  if(b)b.classList.remove("hidden");
+}
+
+function hideUpdateBanner(){
+  const b=document.getElementById("updateBanner");
+  if(b)b.classList.add("hidden");
+}
+
+async function checkForAppUpdate(){
+  if(!swRegistration)return;
+  try{await swRegistration.update()}catch(e){}
+}
+
+if("serviceWorker" in navigator){
+  window.addEventListener("load", async ()=>{
+    try{
+      swRegistration=await navigator.serviceWorker.register("./sw.js",{updateViaCache:"none"});
+
+      if(swRegistration.waiting && navigator.serviceWorker.controller){
+        showUpdateBanner();
+      }
+
+      swRegistration.addEventListener("updatefound", ()=>{
+        const nw=swRegistration.installing;
+        if(!nw)return;
+        nw.addEventListener("statechange", ()=>{
+          if(nw.state==="installed" && navigator.serviceWorker.controller){
+            showUpdateBanner();
+          }
+        });
+      });
+
+      await checkForAppUpdate();
+      setInterval(checkForAppUpdate, 5*60*1000);
+
+      const btn=document.getElementById("applyUpdateBtn");
+      if(btn){
+        btn.addEventListener("click", ()=>{
+          if(swRegistration && swRegistration.waiting){
+            swRegistration.waiting.postMessage({type:"SKIP_WAITING"});
+          }else{
+            location.reload();
+          }
+        });
+      }
+
+      let refreshing=false;
+      navigator.serviceWorker.addEventListener("controllerchange", ()=>{
+        if(refreshing)return;
+        refreshing=true;
+        hideUpdateBanner();
+        location.reload();
+      });
+    }catch(e){
+      console.log("Service worker kunne ikke registreres",e);
+    }
+  });
+}
+
 </script></body></html>

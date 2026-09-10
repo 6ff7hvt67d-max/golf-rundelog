@@ -1,7 +1,9 @@
-Golf Rundelog v1.18
+Golf Rundelog v1.19
 
 NYT:
-- Hver gemt runde i Historik har nu sin egen CSV-knap.
-- CSV-knappen eksporterer kun den valgte runde.
-- Den samlede Eksportér CSV er bevaret.
-- Alle funktioner fra v1.17 er bevaret.
+- Appen kontrollerer automatisk for en nyere version.
+- Når en ny version er klar, vises "Ny version klar" og knappen "Opdatér nu".
+- Hjemmeskærmsikonet skal ikke oprettes igen ved opdateringer.
+- Gemte runder og igangværende kladde bevares.
+
+Alle funktioner fra v1.18 er bevaret.
