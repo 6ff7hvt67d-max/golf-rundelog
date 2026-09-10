@@ -25,7 +25,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 @media(min-width:620px){.summary{grid-template-columns:repeat(4,1fr)}}
 </style></head>
 <body>
-<header><b>Golf Rundelog v1.17</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.18</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -177,12 +177,58 @@ function renderHistory(){
    Approach: Green ${app.G} · Kort ${app.K} · Lang ${app.L} · V ${app.V} · H ${app.H}
    <div class="nav history-actions">
      <button class="secondary" onclick="openSavedRound(${i})">Se oversigt</button>
+     <button class="secondary" onclick="exportRoundCSV(${i})">CSV</button>
      <button class="danger" onclick="deleteRound(${i})">Slet runde</button>
    </div>
    </div>`;
  }).join('');
 }
 function clearHistory(){if(confirm("Slette alle gemte runder?")){localStorage.removeItem('golfRounds');renderHistory()}}
+
+function exportRoundCSV(i){
+  const rounds=getRounds();
+  const r=rounds[i];
+  if(!r)return;
+
+  const holes=r.holes||[];
+  const sum=k=>holes.reduce((a,h)=>a+(Number(h[k])||0),0);
+  const stableford=sum("points");
+  const putts=sum("putts");
+  const onePutts=holes.filter(h=>Number(h.putts)===1).length;
+  const threePlus=holes.filter(h=>Number(h.putts)>=3).length;
+  const free2=holes.filter(h=>h.free2).length;
+  const gir=holes.filter(h=>h.gir).length;
+  const penalties=sum("penalty");
+  const tops=sum("tops");
+
+  const app={G:0,K:0,L:0,V:0,H:0};
+  holes.forEach(h=>{if(app[h.approach]!==undefined)app[h.approach]++;});
+
+  const headers=[
+    "Dato","Bane","Tee","HCP","Stableford","Putts","1-putts","3-putts+",
+    "Frie 2. slag","GIR","Strafslag","Top/fedt","Approach Green",
+    "Approach Kort","Approach Lang","Approach Venstre","Approach Højre"
+  ];
+  const row=[
+    r.date||"",r.course||"",r.tee||"",r.hcp||"",stableford,putts,onePutts,threePlus,
+    free2,gir,penalties,tops,app.G,app.K,app.L,app.V,app.H
+  ];
+
+  const q=v=>'"'+String(v??"").replace(/"/g,'""')+'"';
+  const csv=headers.map(q).join(";")+"\n"+row.map(q).join(";");
+  const blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  const safeDate=(r.date||"runde").replace(/[^\dA-Za-z_-]+/g,"-");
+  const safeCourse=(r.course||"golf").replace(/[^\dA-Za-zÆØÅæøå_-]+/g,"-");
+  a.href=url;
+  a.download=`golf-runde-${safeDate}-${safeCourse}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url),1500);
+}
+
 function exportCSV(){let r=getRounds();if(!r.length){alert("Ingen runder at eksportere.");return}let rows=[["Dato","Bane","Tee","HCP","Stableford","Putts","1-putts","3-putts+","Frie 2. slag","GIR","Strafslag","Top/fedt","Approach Green","Approach Kort","Approach Lang","Approach Venstre","Approach Højre"]];r.forEach(x=>{x.holes.forEach(h=>{if(h.approach===undefined)h.approach=""});let s=calc(x);rows.push([x.date,x.course,x.tee,x.hcp,s.pts,s.putts,s.one,s.three,s.free,s.gir,s.pen,s.tops,s.a.G,s.a.K,s.a.L,s.a.V,s.a.H])});let csv=rows.map(a=>a.map(v=>`"${String(v).replaceAll('"','""')}"`).join(";")).join("\n");let blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"});let a=document.createElement("a");a.href=URL.createObjectURL(blob);a.download="golf_runder.csv";a.click()}
 
 function openSavedRound(i){
