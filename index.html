@@ -31,7 +31,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
   <button id="applyUpdateBtn" class="primary" type="button" style="width:100%">Opdatér nu</button>
 </div>
 
-<header><b>Golf Rundelog v1.19</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.20</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -43,6 +43,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 
 <section id="holeCard" class="card hidden">
 <div style="display:flex;justify-content:space-between;align-items:center"><h2>Registrering</h2><b>Hul <span id="holeNo">1</span>/18</b></div>
+
 <div class="grid2">
 <div><label>Stableford point</label><input id="points" type="hidden"><div id="pointsButtons" class="num-buttons">
 <button type="button" class="num-btn point-btn" onclick="setPoints(0,this)">0</button><button type="button" class="num-btn point-btn" onclick="setPoints(1,this)">1</button><button type="button" class="num-btn point-btn" onclick="setPoints(2,this)">2</button><button type="button" class="num-btn point-btn" onclick="setPoints(3,this)">3</button><button type="button" class="num-btn point-btn" onclick="setPoints(4,this)">4</button><button type="button" class="num-btn point-btn" onclick="setPoints(5,this)">5</button><button type="button" class="num-btn point-btn" onclick="setPoints(6,this)">6</button>
@@ -51,18 +52,24 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 <button type="button" class="num-btn putt-btn" onclick="setPutts(0,this)">0</button><button type="button" class="num-btn putt-btn" onclick="setPutts(1,this)">1</button><button type="button" class="num-btn putt-btn" onclick="setPutts(2,this)">2</button><button type="button" class="num-btn putt-btn" onclick="setPutts(3,this)">3</button><button type="button" class="num-btn putt-btn" onclick="setPutts(4,this)">4</button>
 </div></div></div>
 
-<div style="margin-top:12px"><label>Første putt-længde</label><div class="row" id="puttDistance">
-<button class="pill pd" data-value="" onclick="setPuttDist(this)">Ingen</button><button class="pill pd" data-value="K" onclick="setPuttDist(this)">Kort &lt;3 m</button>
-<button class="pill pd" data-value="M" onclick="setPuttDist(this)">Mellem 3–8 m</button><button class="pill pd" data-value="L" onclick="setPuttDist(this)">Over 8 m</button></div></div>
+<div style="margin-top:12px"><label>Tee-fejl</label><select id="teeError"><option value="">Ingen / ikke relevant</option><option value="S">Slice / hook</option><option value="K">Kort drive</option><option value="B">Bunker</option><option value="OB">Out of bounds</option><option value="P">Strafområde</option></select></div>
 
-<div class="grid2" style="margin-top:12px"><label class="check"><input id="free2" type="checkbox"> Frit 2. slag</label><label class="check"><input id="gir" type="checkbox"> GIR</label></div>
+<div style="margin-top:12px">
+<label class="check"><input id="notFree2" type="checkbox"> Ikke frit 2. slag</label>
+<div class="small" style="margin-top:4px">Lad feltet være tomt, når du har et frit/normalt 2. slag.</div>
+</div>
 
 <div style="margin-top:12px"><label>Resultat af slag, hvor du forsøgte at ramme green</label>
 <select id="approach">
 <option value="">Ikke registreret / ikke relevant</option><option value="G">Green ✓</option><option value="K">Kort</option><option value="L">Lang</option><option value="V">Venstre</option><option value="H">Højre</option>
 </select><div class="small" style="margin-top:4px">Registrér kun et slag, hvor hensigten var at ramme green.</div></div>
 
-<div style="margin-top:12px"><label>Tee-fejl</label><select id="teeError"><option value="">Ingen / ikke relevant</option><option value="S">Slice / hook</option><option value="K">Kort drive</option><option value="B">Bunker</option><option value="OB">Out of bounds</option><option value="P">Strafområde</option></select></div>
+<div style="margin-top:12px"><label class="check"><input id="gir" type="checkbox"> GIR</label></div>
+
+<div style="margin-top:12px"><label>Første putt-længde</label><div class="row" id="puttDistance">
+<button class="pill pd" data-value="" onclick="setPuttDist(this)">Ingen</button><button class="pill pd" data-value="K" onclick="setPuttDist(this)">Kort &lt;3 m</button>
+<button class="pill pd" data-value="M" onclick="setPuttDist(this)">Mellem 3–8 m</button><button class="pill pd" data-value="L" onclick="setPuttDist(this)">Over 8 m</button></div></div>
+
 <div class="grid2" style="margin-top:12px"><div><label>Strafslag</label><input id="penalty" type="number" min="0" value="0"></div><div><label>Toppede/fede slag</label><input id="tops" type="number" min="0" value="0"></div></div>
 <div style="margin-top:12px"><label>Kort note</label><input id="note" placeholder="fx skævt leje, svært slag..."></div>
 <div class="nav hole-nav"><button class="secondary" onclick="prevHole()">← Forrige</button><button class="secondary" onclick="openOverview()">Oversigt</button><button class="primary" onclick="nextHole()">Næste →</button></div>
@@ -141,7 +148,7 @@ function resumeDraft(){
 
 
 {const d=new Date(),dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0');date.value=`${dd}-${mm}-${d.getFullYear()}`;}
-function blankHole(){return {points:null,putts:null,puttDist:"",free2:false,gir:false,approach:"",teeError:"",penalty:0,tops:0,note:""}}
+function blankHole(){return {points:null,putts:null,puttDist:"",free2:true,gir:false,approach:"",teeError:"",penalty:0,tops:0,note:""}}
 function hideAll(){setup.classList.add('hidden');holeCard.classList.add('hidden');overviewCard.classList.add('hidden');summaryCard.classList.add('hidden');historyCard.classList.add('hidden');savedRoundCard.classList.add('hidden')}
 function startRound(){
  const old=readDraft();
@@ -149,8 +156,8 @@ function startRound(){
  round={date:date.value,course:course.value,tee:tee.value,hcp:hcp.value,holes:Array.from({length:18},blankHole)};
  currentHole=0;returnToOverview=false;writeDraft();hideAll();holeCard.classList.remove('hidden');loadHole()
 }
-function saveCurrent(){if(!round)return;let h=round.holes[currentHole];h.points=points.value===""?null:Number(points.value);h.putts=putts.value===""?null:Number(putts.value);h.puttDist=puttDist;h.free2=free2.checked;h.gir=gir.checked;h.approach=approach.value;h.teeError=teeError.value;h.penalty=Number(penalty.value||0);h.tops=Number(tops.value||0);h.note=note.value.trim();writeDraft()}
-function loadHole(){let h=round.holes[currentHole];holeNo.textContent=currentHole+1;points.value=h.points??"";putts.value=h.putts??"";markNumButtons(".point-btn",h.points);markNumButtons(".putt-btn",h.putts);puttDist=h.puttDist||"";document.querySelectorAll('.pd').forEach(b=>b.classList.toggle('active',b.dataset.value===puttDist));free2.checked=h.free2;gir.checked=h.gir;approach.value=h.approach||"";teeError.value=h.teeError||"";penalty.value=h.penalty||0;tops.value=h.tops||0;note.value=h.note||""}
+function saveCurrent(){if(!round)return;let h=round.holes[currentHole];h.points=points.value===""?null:Number(points.value);h.putts=putts.value===""?null:Number(putts.value);h.puttDist=puttDist;h.free2=!notFree2.checked;h.gir=gir.checked;h.approach=approach.value;h.teeError=teeError.value;h.penalty=Number(penalty.value||0);h.tops=Number(tops.value||0);h.note=note.value.trim();writeDraft()}
+function loadHole(){let h=round.holes[currentHole];holeNo.textContent=currentHole+1;points.value=h.points??"";putts.value=h.putts??"";markNumButtons(".point-btn",h.points);markNumButtons(".putt-btn",h.putts);puttDist=h.puttDist||"";document.querySelectorAll('.pd').forEach(b=>b.classList.toggle('active',b.dataset.value===puttDist));notFree2.checked=!h.free2;gir.checked=h.gir;approach.value=h.approach||"";teeError.value=h.teeError||"";penalty.value=h.penalty||0;tops.value=h.tops||0;note.value=h.note||""}
 function markNumButtons(cls,val){document.querySelectorAll(cls).forEach(b=>b.classList.toggle('active',Number(b.textContent)===Number(val)))}
 function setPoints(v,b){points.value=v;markNumButtons('.point-btn',v);saveCurrent();document.getElementById('puttsButtons').scrollIntoView({behavior:'smooth',block:'center'})}
 function setPutts(v,b){putts.value=v;markNumButtons('.putt-btn',v);if(v===0){puttDist="";document.querySelectorAll('.pd').forEach(x=>x.classList.toggle('active',x.dataset.value===""));}else if(puttDist===""){document.querySelectorAll('.pd').forEach(x=>x.classList.remove('active'));}saveCurrent();document.getElementById('puttDistance').scrollIntoView({behavior:'smooth',block:'center'})}

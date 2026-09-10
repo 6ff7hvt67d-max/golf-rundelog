@@ -1,4 +1,4 @@
-const CACHE="golf-rundelog-v1-19";
+const CACHE="golf-rundelog-v1-20";
 const ASSETS=["./","./index.html","./manifest.webmanifest"];
 
 self.addEventListener("install",event=>{
