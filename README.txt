@@ -1,9 +1,7 @@
-Golf Rundelog v1.21
-
-NYT:
-- Ny Vejledning-knap i appen.
-- Ny side: vejledning.html
-- Vejledningen kan deles direkte som link:
-  https://6ff7hvt67d-max.github.io/golf-rundelog/vejledning.html
-- Vejledningen er også lagt i appens cache, så den kan åbnes efter første indlæsning.
-- Alle funktioner fra v1.20 er bevaret.
+Golf Rundelog v1.22
+- Tee-kølle: Driver / Anden kølle. Driver er standard.
+- Anden kølle markeres også ved gode tee-slag, så driverstatistikken bliver retvisende.
+- Registreringssiden er gjort mere kompakt på mobil for mindre scrolling.
+- Vejledningen er opdateret.
+- Autosave, backup, CSV og opdateringsmekanisme er bevaret.
+- Ældre huller uden tee-kølle behandles som Driver.
