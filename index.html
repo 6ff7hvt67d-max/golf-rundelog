@@ -73,6 +73,12 @@ header,main,footer{box-sizing:border-box;width:100%!important;max-width:100vw!im
 #puttDistance{width:100%;min-width:0}
 #puttDistance .pill{min-width:0!important}
 .table-wrap{max-width:100%!important;overflow-x:auto!important;-webkit-overflow-scrolling:touch}
+
+/* v1.28: hard stop for sideways movement on registration */
+#holeCard{touch-action:pan-y!important;overscroll-behavior-x:none!important}
+#holeCard button,#holeCard input,#holeCard select,#holeCard label{touch-action:pan-y!important}
+body.registration-lock{overflow-x:hidden!important;overscroll-behavior-x:none!important;touch-action:pan-y!important}
+body.registration-lock main{overflow-x:hidden!important}
 </style></head>
 <body>
 <div id="updateBanner" class="hidden" style="position:fixed;left:12px;right:12px;top:12px;z-index:9999;background:#fff;border:1px solid #bbb;border-radius:12px;padding:12px;box-shadow:0 4px 18px rgba(0,0,0,.18)">
@@ -81,7 +87,7 @@ header,main,footer{box-sizing:border-box;width:100%!important;max-width:100vw!im
   <button id="applyUpdateBtn" class="primary" type="button" style="width:100%">Opdatér nu</button>
 </div>
 
-<header><b>Golf Rundelog v1.27</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.28</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -189,7 +195,7 @@ function resumeDraft(){
   currentHole=Math.max(0,Math.min(17,Number(d.currentHole)||0));
   returnToOverview=false;
   hideAll();
-  holeCard.classList.remove("hidden");
+  holeCard.classList.remove("hidden");setRegistrationLock(true);
   loadHole();
   window.scrollTo({top:0,behavior:"smooth"});
 }
@@ -197,12 +203,12 @@ function resumeDraft(){
 
 {const d=new Date(),dd=String(d.getDate()).padStart(2,'0'),mm=String(d.getMonth()+1).padStart(2,'0');date.value=`${dd}-${mm}-${d.getFullYear()}`;}
 function blankHole(){return {points:null,putts:null,puttDist:"",free2:true,gir:false,approach:"",teeClub:"D",teeError:"",penalty:0,tops:0,note:""}}
-function hideAll(){setup.classList.add('hidden');holeCard.classList.add('hidden');overviewCard.classList.add('hidden');summaryCard.classList.add('hidden');historyCard.classList.add('hidden');savedRoundCard.classList.add('hidden')}
+function hideAll(){setRegistrationLock(false);setup.classList.add('hidden');holeCard.classList.add('hidden');overviewCard.classList.add('hidden');summaryCard.classList.add('hidden');historyCard.classList.add('hidden');savedRoundCard.classList.add('hidden')}
 function startRound(){
  const old=readDraft();
  if(old && !confirm("Der ligger allerede en igangværende runde. Vil du starte en ny og erstatte den?")) return;
  round={date:date.value,course:course.value,tee:tee.value,hcp:hcp.value,holes:Array.from({length:18},blankHole)};
- currentHole=0;returnToOverview=false;writeDraft();hideAll();holeCard.classList.remove('hidden');loadHole()
+ currentHole=0;returnToOverview=false;writeDraft();hideAll();holeCard.classList.remove('hidden');setRegistrationLock(true);loadHole()
 }
 function saveCurrent(){if(!round)return;let h=round.holes[currentHole];h.points=points.value===""?null:Number(points.value);h.putts=putts.value===""?null:Number(putts.value);h.puttDist=puttDist;h.free2=!notFree2.checked;h.gir=gir.checked;h.teeClub=(document.querySelector(".tc.active")?.dataset.value||h.teeClub||"D");h.approach=approach.value;h.teeError=teeError.value;h.penalty=Number(penalty.value||0);h.tops=Number(tops.value||0);h.note=note.value.trim();writeDraft()}
 function loadHole(){let h=round.holes[currentHole];holeNo.textContent=currentHole+1;points.value=h.points??"";putts.value=h.putts??"";markNumButtons(".point-btn",h.points);markNumButtons(".putt-btn",h.putts);puttDist=h.puttDist||"";document.querySelectorAll('.pd').forEach(b=>b.classList.toggle('active',b.dataset.value===puttDist));notFree2.checked=!h.free2;gir.checked=h.gir;document.querySelectorAll(".tc").forEach(b=>b.classList.toggle("active",b.dataset.value===(h.teeClub||"D")));approach.value=h.approach||"";teeError.value=h.teeError||"";penalty.value=h.penalty||0;tops.value=h.tops||0;note.value=h.note||""}
@@ -213,9 +219,9 @@ function setTeeClub(btn){document.querySelectorAll(".tc").forEach(b=>b.classList
 function setPuttDist(b){puttDist=b.dataset.value;document.querySelectorAll('.pd').forEach(x=>x.classList.toggle('active',x===b))}
 function prevHole(){saveCurrent();if(currentHole>0){currentHole--;loadHole()}}
 function nextHole(){saveCurrent();if(returnToOverview){openOverview();return}if(currentHole<17){currentHole++;loadHole()}else renderSummary()}
-function editHole(i){currentHole=i;returnToOverview=true;hideAll();holeCard.classList.remove('hidden');loadHole()}
+function editHole(i){currentHole=i;returnToOverview=true;hideAll();holeCard.classList.remove('hidden');setRegistrationLock(true);loadHole()}
 function openOverview(){if(!round)return;if(!holeCard.classList.contains('hidden'))saveCurrent();returnToOverview=false;hideAll();overviewCard.classList.remove('hidden');renderOverview()}
-function backToCurrentHole(){returnToOverview=false;hideAll();holeCard.classList.remove('hidden');loadHole()}
+function backToCurrentHole(){returnToOverview=false;hideAll();holeCard.classList.remove('hidden');setRegistrationLock(true);loadHole()}
 function distLabel(v){return v==="K"?"Kort":v==="M"?"Mellem":v==="L"?"Lang":""}
 function appLabel(v){return v==="G"?"Green":v==="K"?"Kort":v==="L"?"Lang":v==="V"?"Venstre":v==="H"?"Højre":""}
 function calc(r){const s=f=>r.holes.reduce((a,h)=>a+(Number(h[f])||0),0);let a={G:0,K:0,L:0,V:0,H:0};r.holes.forEach(h=>{if(a[h.approach]!==undefined)a[h.approach]++});return {pts:s('points'),putts:s('putts'),one:r.holes.filter(h=>h.putts===1).length,three:r.holes.filter(h=>(h.putts||0)>=3).length,free:r.holes.filter(h=>h.free2).length,gir:r.holes.filter(h=>h.gir).length,pen:s('penalty'),tops:s('tops'),long3:r.holes.filter(h=>(h.putts||0)>=3&&h.puttDist==='L').length,a:a}}
@@ -323,7 +329,7 @@ function editSavedRound(i){
   round._editIndex=i;
   currentHole=0;
   hideAll();
-  holeCard.classList.remove('hidden');
+  holeCard.classList.remove('hidden');setRegistrationLock(true);
   loadHole();
   window.scrollTo({top:0,behavior:'smooth'});
 }
@@ -400,6 +406,25 @@ function importBackup(event){
   reader.readAsText(file);
 }
 
+
+function setRegistrationLock(on){
+  document.body.classList.toggle("registration-lock",!!on);
+  if(on){
+    document.documentElement.scrollLeft=0;
+    document.body.scrollLeft=0;
+    window.scrollTo(0,window.scrollY);
+  }
+}
+window.addEventListener("scroll",()=>{
+  const hc=document.getElementById("holeCard");
+  if(hc && !hc.classList.contains("hidden")){
+    if(window.scrollX!==0 || document.documentElement.scrollLeft!==0 || document.body.scrollLeft!==0){
+      document.documentElement.scrollLeft=0;
+      document.body.scrollLeft=0;
+      window.scrollTo(0,window.scrollY);
+    }
+  }
+},{passive:true});
 function setTodayIfEmpty(){
   const el=document.getElementById('date');
   if(!el || el.value.trim()) return;
