@@ -25,6 +25,18 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 @media(min-width:620px){.summary{grid-template-columns:repeat(4,1fr)}}
 .tee-line{display:flex;align-items:center;justify-content:space-between;gap:10px}.tee-line>label{margin:0;white-space:nowrap}.tee-toggle{display:flex;gap:6px;flex:1;justify-content:flex-end}.tee-toggle .pill{padding:9px 12px;min-height:40px}
 @media(max-width:520px){#holeCard{padding-top:12px}#holeCard h2{margin:0}#holeCard label{margin-bottom:4px}#holeCard .grid2{gap:8px}#holeCard select,#holeCard input{min-height:40px}#holeCard .num-btn{min-height:42px;padding:7px 5px}#holeCard .row{gap:5px}#holeCard .pd{padding:8px 7px}}
+/* v1.23 compact mobile */
+#holeCard{padding:12px 14px 82px}
+#holeCard .num-buttons{display:flex;flex-wrap:nowrap;gap:4px}
+#holeCard .num-btn{min-width:0!important;flex:1 1 0;padding:6px 2px!important;min-height:40px!important}
+.compact-flags{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+.flag-btn{display:block!important;margin:0!important}
+.flag-btn input{position:absolute;opacity:0;pointer-events:none}
+.flag-btn span{display:flex;align-items:center;justify-content:center;min-height:40px;border:1px solid #cfd8d3;border-radius:12px;font-weight:600;background:#fff;color:#087ff5}
+.flag-btn input:checked+span{background:#217a46;color:#fff;border-color:#217a46}
+#puttDistance{display:grid!important;grid-template-columns:repeat(4,1fr);gap:4px!important}
+#puttDistance .pill{min-width:0!important;padding:7px 2px!important;font-size:.82rem;white-space:normal;line-height:1.08}
+@media(max-width:520px){#holeCard h2{font-size:1.6rem;margin:0}#holeCard label{font-size:.9rem;margin-bottom:3px}.tee-line{margin-top:6px!important}#holeCard select{min-height:38px!important;padding-top:4px;padding-bottom:4px}#holeCard>div[style*="margin-top:12px"]{margin-top:7px!important}}
 </style></head>
 <body>
 <div id="updateBanner" class="hidden" style="position:fixed;left:12px;right:12px;top:12px;z-index:9999;background:#fff;border:1px solid #bbb;border-radius:12px;padding:12px;box-shadow:0 4px 18px rgba(0,0,0,.18)">
@@ -33,7 +45,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
   <button id="applyUpdateBtn" class="primary" type="button" style="width:100%">Opdatér nu</button>
 </div>
 
-<header><b>Golf Rundelog v1.22</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.23</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -57,17 +69,14 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 <div class="tee-line" style="margin-top:10px"><label>Tee-kølle</label><div class="tee-toggle"><button type="button" class="pill tc" data-value="D" onclick="setTeeClub(this)">Driver</button><button type="button" class="pill tc" data-value="A" onclick="setTeeClub(this)">Anden kølle</button></div></div>
 <div style="margin-top:8px"><label>Tee-fejl</label><select id="teeError"><option value="">Ingen / ikke relevant</option><option value="S">Slice / hook</option><option value="K">Kort drive</option><option value="B">Bunker</option><option value="OB">Out of bounds</option><option value="P">Strafområde</option></select></div>
 
-<div style="margin-top:12px">
-<label class="check"><input id="notFree2" type="checkbox"> Ikke frit 2. slag</label>
-<div class="small" style="margin-top:4px">Lad feltet være tomt, når du har et frit/normalt 2. slag.</div>
-</div>
 
-<div style="margin-top:12px"><label>Resultat af slag, hvor du forsøgte at ramme green</label>
+
+<div style="margin-top:12px"><label>Approach mod green</label>
 <select id="approach">
 <option value="">Ikke registreret / ikke relevant</option><option value="G">Green ✓</option><option value="K">Kort</option><option value="L">Lang</option><option value="V">Venstre</option><option value="H">Højre</option>
-</select><div class="small" style="margin-top:4px">Registrér kun et slag, hvor hensigten var at ramme green.</div></div>
+</select></div><div class="compact-flags"><label class="flag-btn"><input id="notFree2" type="checkbox"><span>Ikke frit 2.</span></label><label class="flag-btn"><input id="gir" type="checkbox"><span>GIR</span></label></div>
 
-<div style="margin-top:12px"><label class="check"><input id="gir" type="checkbox"> GIR</label></div>
+
 
 <div style="margin-top:12px"><label>Første putt-længde</label><div class="row" id="puttDistance">
 <button class="pill pd" data-value="" onclick="setPuttDist(this)">Ingen</button><button class="pill pd" data-value="K" onclick="setPuttDist(this)">Kort &lt;3 m</button>
