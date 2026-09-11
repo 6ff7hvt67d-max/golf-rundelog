@@ -1,5 +1,10 @@
-Golf Rundelog v1.25
-- Korte noter vises nu i den gemte rundes huloversigt, kun når der er skrevet en note.
-- Første putt-knapper er gjort kortere og mere ensartede: Ingen, <3 m, 3–8 m, >8 m.
-- Samtidig er visningen af kort første putt i gemt oversigt rettet til den aktuelle K-kode.
-- Øvrig funktionalitet fra v1.24 er bevaret.
+Golf Rundelog v1.26
+
+RETTELSER
+- Hele app-siden kan ikke længere scrolles vandret på mobil.
+- Registreringssiden er låst til skærmens bredde.
+- Den gemte rundes oversigt bruger nu den korrekte table-wrap-container.
+- Den brede oversigtstabel scroller kun inde i selve oversigtsfeltet.
+- Titlen på gemte runder er gjort mere kompakt på små skærme.
+- Korte noter fra v1.25 er bevaret.
+- Øvrige funktioner, autosave, backup, CSV og opdateringsfunktion er bevaret.

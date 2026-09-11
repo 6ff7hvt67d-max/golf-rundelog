@@ -40,6 +40,22 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 .saved-note-row td{padding-top:0!important;border-top:0!important}
 .saved-note{margin:4px 0 8px;padding:6px 8px;border-radius:8px;background:#f4f6f4;font-size:.9rem;color:#4b5563;text-align:left}
 .saved-note b{color:#1f2937}
+
+/* v1.26: prevent whole-page horizontal scrolling */
+html,body{width:100%;max-width:100%;overflow-x:hidden}
+main{width:100%;max-width:920px;overflow-x:hidden}
+.card,#holeCard,#savedRoundCard,#overviewCard{max-width:100%;min-width:0}
+.table-wrap{width:100%;max-width:100%;overflow-x:auto;-webkit-overflow-scrolling:touch}
+.table-wrap table{width:max-content;min-width:100%}
+#holeCard .grid2,#holeCard .num-buttons,#puttDistance,.tee-line,.tee-toggle{min-width:0}
+#holeCard .tee-toggle button{min-width:0}
+@media(max-width:520px){
+  #savedRoundTitle{font-size:1.25rem;line-height:1.2;overflow-wrap:anywhere;margin-bottom:10px}
+  #savedRoundCard{padding:12px}
+  #savedRoundCard .table-wrap{border:1px solid var(--line);border-radius:10px}
+  #savedRoundCard table{font-size:11px}
+  #savedRoundCard th,#savedRoundCard td{padding:6px 5px}
+}
 </style></head>
 <body>
 <div id="updateBanner" class="hidden" style="position:fixed;left:12px;right:12px;top:12px;z-index:9999;background:#fff;border:1px solid #bbb;border-radius:12px;padding:12px;box-shadow:0 4px 18px rgba(0,0,0,.18)">
@@ -48,7 +64,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
   <button id="applyUpdateBtn" class="primary" type="button" style="width:100%">Opdatér nu</button>
 </div>
 
-<header><b>Golf Rundelog v1.25</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.26</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
@@ -102,7 +118,7 @@ footer{position:fixed;left:0;right:0;bottom:0;background:#fff;border-top:1px sol
 
 <section id="savedRoundCard" class="card hidden">
 <h2 id="savedRoundTitle">Gemt runde</h2>
-<div class="tablewrap"><table><thead><tr><th>Hul</th><th>Pt</th><th>Putts</th><th>1. putt</th><th>Frit 2.</th><th>Tee-fejl</th><th>Straf</th><th>Top</th><th>GIR</th><th>Approach</th></tr></thead><tbody id="savedRoundBody"></tbody></table></div>
+<div class="table-wrap"><table><thead><tr><th>Hul</th><th>Pt</th><th>Putts</th><th>1. putt</th><th>Frit 2.</th><th>Tee-fejl</th><th>Straf</th><th>Top</th><th>GIR</th><th>Approach</th></tr></thead><tbody id="savedRoundBody"></tbody></table></div>
 <div class="nav"><button class="secondary" onclick="showHistory()">← Historik</button><button class="primary" id="editSavedBtn">Ret runde</button></div>
 </section><section id="historyCard" class="card hidden"><h2>Gemte runder</h2>
 <div id="resumeDraftHistory" class="hidden" style="margin-bottom:12px">
