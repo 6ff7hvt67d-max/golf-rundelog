@@ -107,18 +107,18 @@ body.registration-lock main{overflow-x:hidden!important}
   <button id="applyUpdateBtn" class="primary" type="button" style="width:100%">Opdatér nu</button>
 </div>
 
-<header><b>Golf Rundelog v1.29</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
+<header><b>Golf Rundelog v1.30</b><div style="font-size:12px">Tee · approach · green · putting</div></header>
 <main>
 <section id="setup" class="card"><h2>Ny runde</h2><div class="setup-date-course">
 <div><label>Dato</label><input id="date" type="text" inputmode="numeric" placeholder="dd-mm-åååå" autocomplete="off"></div><div><label>Bane</label><input id="course" value="Asserbo"></div>
-<div><label>Tee</label><input id="tee" value="52"></div><div><label>Handicap</label><input id="hcp" type="number" step="0.1" value="29.9"></div>
-</div><div id="resumeDraftSetup" class="hidden" style="margin:10px 0">
+<div><label>Tee</label><input id="tee" value="52"></div><div><label>Handicap</label><input id="hcp" type="number" step="0.1" placeholder="Dit aktuelle HCP" min="-10" max="54"></div>
+<div><label>Antal huller</label><select id="holeCount"><option value="18">18 huller</option><option value="9">9 huller</option></select></div></div><div class="small" style="margin-top:8px">HCP huskes fra din seneste indtastning. Opdater selv efter GolfBox.</div><div id="resumeDraftSetup" class="hidden" style="margin:10px 0">
   <button class="secondary" type="button" onclick="resumeDraft()" style="width:100%">Fortsæt igangværende runde</button>
 </div>
 <button class="primary" style="width:100%;margin-top:12px" onclick="startRound()">Start runde</button></section>
 
 <section id="holeCard" class="card hidden">
-<div style="display:flex;justify-content:space-between;align-items:center"><h2>Registrering</h2><b>Hul <span id="holeNo">1</span>/18</b></div>
+<div style="display:flex;justify-content:space-between;align-items:center"><h2>Registrering</h2><b>Hul <span id="holeNo">1</span>/<span id="totalHoles">18</span></b></div>
 
 <div class="grid2">
 <div><label>Stableford point</label><input id="points" type="hidden"><div id="pointsButtons" class="num-buttons">
@@ -150,7 +150,7 @@ body.registration-lock main{overflow-x:hidden!important}
 </section>
 
 <section id="overviewCard" class="card hidden">
-<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin:0">18-huls oversigt</h2><span class="badge">Tryk på en række for at rette</span></div>
+<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h2 style="margin:0">Huloversigt</h2><span class="badge">Tryk på en række for at rette</span></div>
 <div class="toolbar"><button class="secondary" onclick="backToCurrentHole()">Tilbage til hul</button><button class="primary" onclick="renderSummary()">Afslut runde</button></div>
 <div class="table-wrap"><table><thead><tr><th>Hul</th><th>Pt</th><th>Putts</th><th>1. putt</th><th>Frit 2.</th><th>Approach</th><th>Tee-fejl</th><th>Straf</th><th>Top</th><th>GIR</th></tr></thead>
 <tbody id="overviewBody"></tbody><tfoot id="overviewFoot"></tfoot></table></div></section>
@@ -163,7 +163,7 @@ body.registration-lock main{overflow-x:hidden!important}
 <h2 id="savedRoundTitle">Gemt runde</h2>
 <div class="table-wrap"><table><thead><tr><th>Hul</th><th>Pt</th><th>Putts</th><th>1. putt</th><th>Frit 2.</th><th>Tee-fejl</th><th>Straf</th><th>Top</th><th>GIR</th><th>Approach</th></tr></thead><tbody id="savedRoundBody"></tbody></table></div>
 <div class="nav"><button class="secondary" onclick="showHistory()">← Historik</button><button class="primary" id="editSavedBtn">Ret runde</button></div>
-</section><section id="historyCard" class="card hidden"><h2>Gemte runder</h2>
+</section><section id="historyCard" class="card hidden"><h2>Gemte runder</h2><div id="roundTrends"></div>
 <div id="resumeDraftHistory" class="hidden" style="margin-bottom:12px">
   <button class="primary" type="button" onclick="resumeDraft()" style="width:100%">Fortsæt igangværende runde</button>
   <div class="small" style="margin-top:6px">Din igangværende runde er gemt automatisk.</div>
@@ -225,20 +225,21 @@ function resumeDraft(){
 function blankHole(){return {points:null,putts:null,puttDist:"",free2:true,gir:false,approach:"",teeClub:"D",teeError:"",penalty:0,tops:0,note:""}}
 function hideAll(){setRegistrationLock(false);setup.classList.add('hidden');holeCard.classList.add('hidden');overviewCard.classList.add('hidden');summaryCard.classList.add('hidden');historyCard.classList.add('hidden');savedRoundCard.classList.add('hidden')}
 function startRound(){
+ if(!rememberHcp()){alert("Indtast et gyldigt HCP mellem -10 og 54.");return;}
  const old=readDraft();
  if(old && !confirm("Der ligger allerede en igangværende runde. Vil du starte en ny og erstatte den?")) return;
- round={date:date.value,course:course.value,tee:tee.value,hcp:hcp.value,holes:Array.from({length:18},blankHole)};
+ round={date:date.value,course:course.value,tee:tee.value,hcp:hcp.value,holes:Array.from({length:Number(document.getElementById("holeCount").value)},blankHole)};
  currentHole=0;returnToOverview=false;writeDraft();hideAll();holeCard.classList.remove('hidden');setRegistrationLock(true);loadHole()
 }
 function saveCurrent(){if(!round)return;let h=round.holes[currentHole];h.points=points.value===""?null:Number(points.value);h.putts=putts.value===""?null:Number(putts.value);h.puttDist=puttDist;h.free2=!notFree2.checked;h.gir=gir.checked;h.teeClub=(document.querySelector(".tc.active")?.dataset.value||h.teeClub||"D");h.approach=approach.value;h.teeError=teeError.value;h.penalty=Number(penalty.value||0);h.tops=Number(tops.value||0);h.note=note.value.trim();writeDraft()}
-function loadHole(){let h=round.holes[currentHole];holeNo.textContent=currentHole+1;points.value=h.points??"";putts.value=h.putts??"";markNumButtons(".point-btn",h.points);markNumButtons(".putt-btn",h.putts);puttDist=h.puttDist||"";document.querySelectorAll('.pd').forEach(b=>b.classList.toggle('active',b.dataset.value===puttDist));notFree2.checked=!h.free2;gir.checked=h.gir;document.querySelectorAll(".tc").forEach(b=>b.classList.toggle("active",b.dataset.value===(h.teeClub||"D")));approach.value=h.approach||"";teeError.value=h.teeError||"";penalty.value=h.penalty||0;tops.value=h.tops||0;note.value=h.note||""}
+function loadHole(){let h=round.holes[currentHole];holeNo.textContent=currentHole+1;document.getElementById("totalHoles").textContent=round.holes.length;points.value=h.points??"";putts.value=h.putts??"";markNumButtons(".point-btn",h.points);markNumButtons(".putt-btn",h.putts);puttDist=h.puttDist||"";document.querySelectorAll('.pd').forEach(b=>b.classList.toggle('active',b.dataset.value===puttDist));notFree2.checked=!h.free2;gir.checked=h.gir;document.querySelectorAll(".tc").forEach(b=>b.classList.toggle("active",b.dataset.value===(h.teeClub||"D")));approach.value=h.approach||"";teeError.value=h.teeError||"";penalty.value=h.penalty||0;tops.value=h.tops||0;note.value=h.note||""}
 function markNumButtons(cls,val){document.querySelectorAll(cls).forEach(b=>b.classList.toggle('active',Number(b.textContent)===Number(val)))}
 function setPoints(v,b){points.value=v;markNumButtons('.point-btn',v);saveCurrent();document.getElementById('puttsButtons').scrollIntoView({behavior:'smooth',block:'center'})}
 function setPutts(v,b){putts.value=v;markNumButtons('.putt-btn',v);if(v===0){puttDist="";document.querySelectorAll('.pd').forEach(x=>x.classList.toggle('active',x.dataset.value===""));}else if(puttDist===""){document.querySelectorAll('.pd').forEach(x=>x.classList.remove('active'));}saveCurrent();document.getElementById('puttDistance').scrollIntoView({behavior:'smooth',block:'center'})}
-function setTeeClub(btn){document.querySelectorAll(".tc").forEach(b=>b.classList.remove("active"));btn.classList.add("active");holes[currentHole].teeClub=btn.dataset.value;writeDraft();}
+function setTeeClub(btn){document.querySelectorAll(".tc").forEach(b=>b.classList.remove("active"));btn.classList.add("active");round.holes[currentHole].teeClub=btn.dataset.value;writeDraft();}
 function setPuttDist(b){puttDist=b.dataset.value;document.querySelectorAll('.pd').forEach(x=>x.classList.toggle('active',x===b))}
 function prevHole(){saveCurrent();if(currentHole>0){currentHole--;loadHole()}}
-function nextHole(){saveCurrent();if(returnToOverview){openOverview();return}if(currentHole<17){currentHole++;loadHole()}else renderSummary()}
+function nextHole(){saveCurrent();if(returnToOverview){openOverview();return}if(currentHole<round.holes.length-1){currentHole++;loadHole()}else renderSummary()}
 function editHole(i){currentHole=i;returnToOverview=true;hideAll();holeCard.classList.remove('hidden');setRegistrationLock(true);loadHole()}
 function openOverview(){if(!round)return;if(!holeCard.classList.contains('hidden'))saveCurrent();returnToOverview=false;hideAll();overviewCard.classList.remove('hidden');renderOverview()}
 function backToCurrentHole(){returnToOverview=false;hideAll();holeCard.classList.remove('hidden');setRegistrationLock(true);loadHole()}
@@ -251,6 +252,7 @@ const historyList=document.getElementById("history");
 function getRounds(){return JSON.parse(localStorage.getItem('golfRounds')||'[]')}function setRounds(r){localStorage.setItem('golfRounds',JSON.stringify(r))}
 function saveRound(){let r=getRounds();if(Number.isInteger(round._editIndex)){const i=round._editIndex;delete round._editIndex;r[i]=round}else{r.unshift(round)}setRounds(r);clearDraft();round=null;renderHistory();alert("Runden er gemt på denne enhed.");showHistory()}
 function renderHistory(){
+ renderTrends();
  const r=getRounds();
  if(!r.length){historyList.innerHTML="Ingen gemte runder endnu.";return}
  historyList.innerHTML=r.map((x,i)=>{
@@ -455,8 +457,18 @@ function setTodayIfEmpty(){
   el.value=`${dd}-${mm}-${yyyy}`;
 }
 
-function showSetup(){setTodayIfEmpty();updateDraftButtons();hideAll();setup.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+function showSetup(){restoreHcp();setTodayIfEmpty();updateDraftButtons();hideAll();setup.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
 function showHistory(){if(round&&!holeCard.classList.contains('hidden'))saveCurrent();renderHistory();updateDraftButtons();hideAll();historyCard.classList.remove('hidden');window.scrollTo({top:0,behavior:'smooth'})}
+
+const HCP_PREF='golfLastEnteredHcp';
+function validHcp(v){return v!==null&&String(v).trim()!==''&&Number.isFinite(Number(String(v).replace(',','.')))&&Number(String(v).replace(',','.'))>=-10&&Number(String(v).replace(',','.'))<=54}
+function rememberHcp(){const v=document.getElementById('hcp').value.replace(',','.');if(!validHcp(v))return false;localStorage.setItem(HCP_PREF,v);return true}
+function dateKey(v){const a=String(v||'').split('-');return a[0]?.length===4?String(v):a.reverse().join('-')}
+function restoreHcp(){let v=localStorage.getItem(HCP_PREF);if(!validHcp(v)){const latest=getRounds().filter(r=>validHcp(r.hcp)).slice().sort((a,b)=>dateKey(b.date).localeCompare(dateKey(a.date)))[0];v=latest?.hcp??'';}document.getElementById('hcp').value=validHcp(v)?String(v).replace(',','.'):''}
+function trendSvg(rs,fields,labels){if(!rs.length)return '<p class="small">Gem en runde for at se din udvikling.</p>';const colors=['#286b49','#c3984d'];const values=rs.map(r=>{const a=calc(r),n=r.holes.length;return fields.map(k=>a[k]*18/n)});const max=Math.max(5,...values.flat())*1.15;let out='<svg viewBox="0 0 600 220" role="img" aria-label="'+labels.join(' og ')+' over tid" style="width:100%;display:block">';for(let j=0;j<5;j++){let y=15+j*42;out+=`<line x1="35" x2="580" y1="${y}" y2="${y}" stroke="#e2e8dd"/><text x="2" y="${y+4}" font-size="11" fill="#73806f">${Math.round(max*(4-j)/4)}</text>`}fields.forEach((k,j)=>{const coords=values.map((v,i)=>[rs.length===1?300:45+i*525/(rs.length-1),183-v[j]/max*168]);out+=`<polyline fill="none" stroke="${colors[j]}" stroke-width="2.5" points="${coords.map(p=>p.join(',')).join(' ')}"/>`;coords.forEach((p,i)=>out+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="${colors[j]}"><title>${escapeHtml(rs[i].date)}: ${values[i][j].toFixed(1)}</title></circle>`)});rs.forEach((r,i)=>{if(i%Math.max(1,Math.ceil(rs.length/6))===0)out+=`<text x="${rs.length===1?300:45+i*525/(rs.length-1)}" y="210" text-anchor="middle" font-size="10" fill="#73806f">${escapeHtml(String(r.date).slice(0,5))}</text>`});return out+'</svg><div class="small" style="display:flex;flex-wrap:wrap;gap:16px">'+labels.map((l,j)=>`<span style="color:${colors[j]}">● ${l}</span>`).join('')+'</div>'}
+function renderTrends(){const el=document.getElementById('roundTrends');if(!el)return;const rs=getRounds().filter(r=>Array.isArray(r.holes)&&r.holes.length).slice().sort((a,b)=>dateKey(a.date).localeCompare(dateKey(b.date)));const selected=document.getElementById('trendTee')?.value||'Alle';const filtered=rs.filter(r=>selected==='Alle'||String(r.tee)===selected);el.innerHTML=`<label>Tee i statistik<select id="trendTee" onchange="renderTrends()"><option>Alle</option><option>52</option><option>57</option></select></label><div style="margin:18px 0"><h3>Rundernes udvikling</h3>${trendSvg(filtered,['pts','tops'],['Point pr. 18 huller','Top/fedt pr. 18 huller'])}</div><div style="margin:18px 0"><h3>Putting og strafslag</h3>${trendSvg(filtered,['putts','pen'],['Putts pr. 18 huller','Strafslag pr. 18 huller'])}</div><p class="small">9-hullers tal ganges med 2 i graferne. Tabellen viser de faktiske tal. Det er ikke en handicapberegning.</p><div class="table-wrap"><table><thead><tr><th>Dato / bane</th><th>Tee</th><th>HCP</th><th>Huller</th><th>Point</th><th>Putts</th><th>Top/fedt</th></tr></thead><tbody>${filtered.slice().reverse().map(r=>{const a=calc(r);return `<tr><td>${escapeHtml(r.date)}<br>${escapeHtml(r.course)}</td><td>${escapeHtml(r.tee)}</td><td>${escapeHtml(r.hcp)}</td><td>${r.holes.length}</td><td>${a.pts}</td><td>${a.putts}</td><td>${a.tops}</td></tr>`}).join('')}</tbody></table></div><hr style="border:0;border-top:1px solid #d8dfda;margin:24px 0">`;document.getElementById('trendTee').value=selected}
+document.getElementById('hcp').addEventListener('change',rememberHcp);
+
 renderHistory();showSetup();if('serviceWorker'in navigator&&location.protocol.startsWith('http'))setTodayIfEmpty();
 
 ["change","input"].forEach(evt=>{
