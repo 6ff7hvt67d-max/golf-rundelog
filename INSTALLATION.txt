@@ -1,0 +1,11 @@
+GOLF RUNDELOG v1.31 – INSTALLATION
+
+1. Lav en backup i appen inden opdatering.
+2. Kopiér index.html, sw.js og traening.html til roden af dit eksisterende GitHub-projekt.
+3. Kopiér mappen tips-billeder (med alle 4 .webp-filer) ind i samme projekt.
+4. Behold dine eksisterende filer, herunder vejledning.html og manifest.webmanifest.
+5. Commit og Push i GitHub Desktop.
+6. Åbn appen i Safari, og tryk Opdatér nu hvis der vises en ny version.
+7. Se den nye knap Træning.
+
+Ingen nye runderegistreringsfelter. Eksisterende localStorage-data bevares på samme telefon/browser.

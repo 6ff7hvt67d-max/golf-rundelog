@@ -1,5 +1,5 @@
-const CACHE="golf-rundelog-v1-30";
-const ASSETS=["./","./index.html","./vejledning.html","./manifest.webmanifest"];
+const CACHE="golf-rundelog-v1-31";
+const ASSETS=["./","./index.html","./vejledning.html","./manifest.webmanifest","./traening.html","./tips-billeder/over-foedderne.webp","./tips-billeder/under-foedderne.webp","./tips-billeder/op-ad-bakke.webp","./tips-billeder/ned-ad-bakke.webp"];
 
 self.addEventListener("install",event=>{
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
@@ -24,13 +24,10 @@ self.addEventListener("fetch",event=>{
 
   if(req.mode==="navigate"){
     event.respondWith(
-      fetch(req)
-        .then(resp=>{
-          const copy=resp.clone();
-          caches.open(CACHE).then(cache=>cache.put("./index.html",copy));
-          return resp;
-        })
-        .catch(()=>caches.match("./index.html"))
+      fetch(req).then(resp=>{
+        if(resp && resp.ok){const copy=resp.clone();caches.open(CACHE).then(c=>c.put(req,copy));}
+        return resp;
+      }).catch(async()=> (await caches.match(req)) || (await caches.match("./index.html")))
     );
     return;
   }
